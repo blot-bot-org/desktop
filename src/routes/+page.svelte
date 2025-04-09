@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+  import TestComponent from "$components/TestComponent.svelte";
 
   let num_lines = $state(1);
 
@@ -17,6 +18,9 @@
 </script>
 
 <main class="container">
+    <TestComponent />
+    <TestComponent />
+
     <button on:click={gen_preview}>Go</button>
     <input type="range" min="1" max="32" bind:value={num_lines} />
     <img id="preview-image" loading="lazy" />
@@ -24,4 +28,12 @@
 </main>
 
 <style>
+    /*
+    * Master styling
+    */
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
 </style>
