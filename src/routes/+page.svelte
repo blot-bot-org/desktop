@@ -1,30 +1,18 @@
 <script lang="ts">
-  import { invoke, convertFileSrc } from "@tauri-apps/api/core";
-  import TestComponent from "$components/TestComponent.svelte";
+    import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+    import Dashboard from "$components/Dashboard.svelte";
+    import Preview from "$components/Preview.svelte";
+    import Slider from "$components/parameters/Slider.svelte";
 
-  let num_lines = $state(1);
-
-  async function gen_preview(event: Event) {
-      event.preventDefault();
-
-      let path = await invoke("gen_preview", { jsonParams: `{"num_lines":${num_lines}}` });
-      let imageUrl = convertFileSrc(path);
-
-      imageUrl += `?refresh=${Math.floor(Math.random() * 10000000)}`; // hack to force reload image by adding random parameter to change url
-
-      let imageElement = document.getElementById("preview-image").src = imageUrl;
-
-  }
+    let previewRef;
+    let dashboardRef;
 </script>
 
 <main class="container">
-    <TestComponent />
-    <TestComponent />
-
-    <button on:click={gen_preview}>Go</button>
-    <input type="range" min="1" max="32" bind:value={num_lines} />
-    <img id="preview-image" loading="lazy" />
-
+    <div id="app">
+        <Preview bind:this={previewRef} />
+        <Dashboard bind:this={dashboardRef} previewRef={previewRef} />
+    </div>
 </main>
 
 <style>
@@ -35,5 +23,18 @@
     * {
         margin: 0;
         padding: 0;
+    }
+
+    .container {
+        width: 100%;
+        height: 100%;
+    }
+
+    #app {
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        overflow: none;
     }
 </style>
