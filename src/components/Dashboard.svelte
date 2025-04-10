@@ -65,4 +65,12 @@
         cursor: pointer;
         background-color: #53b7d6;
     }
+
+    /*
+        Must be applied to all parameter types (slider, number etc.)
+    */
+    :global(.param-container) {
+        max-width: 100%;
+        min-height: 40px;
+    }
 </style>
