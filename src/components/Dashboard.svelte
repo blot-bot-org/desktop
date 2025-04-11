@@ -1,6 +1,9 @@
 <script lang="ts">
     import Parameters from "../configuration/parameters.json";
     import Slider from "$components/parameters/Slider.svelte";
+    import Number from "$components/parameters/Number.svelte";
+    import Text from "$components/parameters/Text.svelte";
+    import Divider from "$components/parameters/Divider.svelte";
 
     export let previewRef;
 
@@ -11,7 +14,8 @@
     let parameterObject;
     
     async function make_preview(event: Event) {
-        event.preventDefault();
+        if(event) event.preventDefault();
+
         await previewRef.gen_preview(parameterObject);
     }
 
@@ -24,6 +28,8 @@
         for(let object of Parameters[styleId]["parameters"]) {
             parameterObject[object.id] = object.default;
         }
+
+        previewRef.gen_preview(parameterObject);
     }
 
     switchStyle(initialStyleId);
@@ -32,11 +38,18 @@
 
 <div id="dashboard">
     <button on:click={make_preview}>Generate preview</button>
-	{#each Parameters[styleId]["parameters"] as param}
-        {#if param.type == "slider"}
-            <Slider min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} />
-        {/if}
-	{/each}
+    <div class="parameter-container">
+        {#each Parameters[styleId]["parameters"] as param}
+            {#if param.type == "slider"}
+                <Slider min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+            {:else if param.type == "number"}
+                <Number min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+            {:else if param.type == "text"}
+                <Text maxlength={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+            {/if}
+            <Divider />
+        {/each}
+    </div>
 </div>
 
 
@@ -44,6 +57,10 @@
     #dashboard {
         flex-grow: 1;
         height: 100%;
+    }
+
+    .parameter-container {
+        margin: 20px;
     }
 
     button {

@@ -15,10 +15,18 @@
                 "name":"Horizontal Margin",
                 "id": "horizontal_margin",
                 "description": "The horizontal margin of the line, in millimetres",
-                "type": "slider",
+                "type": "number",
                 "min": 3,
                 "max": 60,
                 "default":20
+            },
+            {
+                "name":"Test string",
+                "id": "test_string",
+                "description": "a",
+                "type": "text",
+                "maxlength": 20,
+                "default":"hello"
             }
         ]
     }

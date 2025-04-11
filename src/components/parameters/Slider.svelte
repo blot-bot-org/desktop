@@ -4,12 +4,14 @@
     export let name;
     export let id;
 
+    export let onChangeCallback;
+
     export let value;
 </script>
 
 <div class="param-container slider-container">
     <label for={id}>{name}: {value}</label>
-    <input class="slider-style" type="range" id={id} name={name} min={min} max={max} bind:value={value} />
+    <input class="slider-style" type="range" id={"param-" + id} name={name} min={min} max={max} bind:value={value} on:change={() => { if(onChangeCallback) { onChangeCallback() }; }} />
 </div>
 
 <style>
@@ -29,16 +31,22 @@
         -webkit-appearance: none;
         background: transparent;
         cursor: pointer;
+
+        margin-top: 8px;
     }
 
     .slider-style::-webkit-slider-runnable-track  {
         background: #D0D0D0;
-        height: 10px;
+        height: 2px;
+
+        border-radius: 3px;
     }
 
     .slider-style::-moz-range-track {
         background: #D0D0D0;
-        height: 10px;
+        height: 2px;
+
+        border-radius: 3px;
     }
 
     .slider-style::-webkit-slider-thumb {
@@ -46,9 +54,9 @@
         appearance: none;
 
         background: #000000;
-        margin-top: -3px;
+        margin-top: -7px;
         height: 16px;
-        width: 8px;
+        width: 5px;
         border-radius: 3px;
     }
 
