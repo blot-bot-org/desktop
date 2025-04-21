@@ -7,7 +7,7 @@
 
     export let previewRef;
 
-    const initialStyleId = "lines";
+    const initialStyleId = "scribble";
 
     let styleId = "";
     let styleName = "";
@@ -19,7 +19,7 @@
         await previewRef.gen_preview(parameterObject);
     }
 
-    function switchStyle(newStyle) {
+    async function switchStyle(newStyle) {
         parameterObject = {};
 
         styleId = newStyle;
@@ -27,6 +27,17 @@
 
         for(let object of Parameters[styleId]["parameters"]) {
             parameterObject[object.id] = object.default;
+        }
+        
+        let i = 0;
+        while (previewRef == undefined) {
+            await new Promise(r => setTimeout(r, 10));
+            i += 1;
+
+            if (i > 1000) { // 10 seconds
+                console.log("Error! `previewRef` was never intialised in dashboard");
+                break;
+            }
         }
 
         previewRef.gen_preview(parameterObject);

@@ -29,5 +29,78 @@
                 "default":"hello"
             }
         ]
+    },
+    "cascade": {
+        "name":"Cascade",
+        "parameters": [
+            {
+                "name":"Horizontal Boxes",
+                "id":"boxes_horizontal",
+                "description": "The number of triangle boxes, horizontal",
+                "type":"slider",
+                "min": 5,
+                "max": 100,
+                "default": 20
+            },
+            {
+                "name":"Vertical Boxes",
+                "id":"boxes_vertical",
+                "description": "The number of triangle boxes, vertically",
+                "type":"slider",
+                "min": 5,
+                "max": 100,
+                "default": 20
+            },
+            {
+                "name":"Horizontal Margin",
+                "id":"horizontal_margin",
+                "description": "The horizontal margin of the pattern, in millimetres",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            },
+            {
+                "name":"Vertical Margin",
+                "id":"vertical_margin",
+                "description": "The vertical margin of the pattern, in millimeters",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            }
+        ]
+    },
+    "scribble": {
+        "name":"Scribbles",
+        "parameters": [
+            {
+                "name":"Stipple Count",
+                "id":"num_stipples",
+                "description": "The number of stipple points",
+                "type":"slider",
+                "min": 500,
+                "max": 10000,
+                "default": 1000
+            },
+            {
+                "name":"Relaxation Iterations",
+                "id":"num_iterations",
+                "description": "The number of iterations of Lloyd's relaxation performed on the points",
+                "type":"slider",
+                "min": 1,
+                "max": 1000,
+                "default": 20
+            },
+            {
+                "name":"Relaxation Tendency",
+                "id":"relaxation_tendency",
+                "description": "The tendency of cells to relaxe",
+                "type":"slider",
+                "min": -1.0,
+                "max": 1.0,
+                "default": 0.05
+            }
+        ]
     }
 }

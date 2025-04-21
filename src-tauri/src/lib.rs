@@ -1,6 +1,6 @@
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
-use bbcore::drawing::lines::{LinesMethod, LinesParameters};
+use bbcore::drawing::scribble::{ScribbleMethod, ScribbleParameters};
 use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
 
@@ -8,8 +8,8 @@ use bbcore::instruction::InstructionSet;
 fn gen_preview(app: tauri::AppHandle, json_params: &str) -> String {
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
 
-    let params: LinesParameters = serde_json::from_str(json_params).unwrap();
-    let lines = LinesMethod {};
+    let params: ScribbleParameters = serde_json::from_str(json_params).unwrap();
+    let lines = ScribbleMethod {};
 
     let ins_bytes = lines.gen_instructions(&phys_dim, &params);
     let instruction_set = InstructionSet::new(ins_bytes).unwrap();
