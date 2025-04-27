@@ -1,20 +1,88 @@
 <script lang="ts">
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+    import { getCurrentWindow } from "@tauri-apps/api/window";
+    import { onMount } from "svelte";
+    import { fade } from "svelte/transition"
+	import { Pulse } from 'svelte-loading-spinners';
+
+
+    let imageWidth = $state(210);
+    let imageHeight = $state(297);
+
+    (async () => {
+        const unlisten = await getCurrentWindow().onResized(({ payload: size }) => {
+            recomputeImageResolution(imageWidth, imageHeight);
+        });
+    })()
+
+    // calculates the on-screen image resolution
+    function recomputeImageResolution() {
+        // get the real image resolution - so the new url needs to be set by here
+        let imageElement = document.getElementById("preview-image");
+        let realImgWidth = imageElement.naturalWidth;
+        let realImgHeight = imageElement.naturalHeight;
+
+
+        let previewStageElement = document.getElementById("preview-image-container");
+
+        let marginRatio = 0.1;
+
+        // these values have pre-calculated margin
+        let stageWidth = previewStageElement.getBoundingClientRect().width * (1 - (2 * marginRatio));
+        let stageHeight = previewStageElement.getBoundingClientRect().height * (1 - (2 * marginRatio));
+
+        // these values are the left / top offset as a margin - still need to add
+        /*
+        let leftMargin = (marginRatio * stageWidth) / (1 - 2 * (marginRatio);
+        let topMargin = (marginRatio * stageHeight) / (1 - 2 * (marginRatio);
+        */
+
+        // calculate dimension to maximise
+        let ratio = realImgWidth / realImgHeight;
+        let maxWidth = true; // this if statement can be simplified
+        if (stageWidth > ratio * stageHeight) {
+            maxWidth = false;
+        }
+
+        // mod global states here
+        if(maxWidth) {
+            imageWidth = Math.round(stageWidth);
+            imageHeight = Math.round(stageWidth / ratio);
+        } else {
+            imageWidth = Math.round(stageHeight * ratio);
+            imageHeight = Math.round(stageHeight);
+        }
+    }
   
+
+
+
     let imageSrc = $state("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANIAAAEpAQMAAADcde5vAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAAB9JREFUGBntwTEBAAAAwiD7p14IX2AAAAAAAAAAAIcAIHwAAU/BTAIAAAAASUVORK5CYII=");
+    let renderLoadingOverlay = $state(true);
   
-    export async function gen_preview(parameter_object) {
-        console.log(`Invoking preview function with obj:`);
-        console.log(parameter_object);
-        let path = await invoke("gen_preview", { jsonParams: JSON.stringify(parameter_object) });
+    export async function gen_preview(style_id, parameter_object) {
+        // console.log(`Invoking preview function with obj:`);
+        // console.log(parameter_object);
+
+        let timeoutRef = setTimeout(() => {
+            renderLoadingOverlay = true;
+        }, 250);
+
+        console.log(style_id)
+        let path = await invoke("gen_preview", { styleId: style_id, jsonParams: JSON.stringify(parameter_object) });
         let imageUrl = convertFileSrc(path);
+
+        clearTimeout(timeoutRef);
+        renderLoadingOverlay = false;
   
         imageUrl += `?refresh=${Math.floor(Math.random() * 10000000)}`; // hack to force reload image by adding random parameter to change url
         imageSrc = imageUrl;
-  
+        
+        recomputeImageResolution();
     }
   
     export function scaleImage(event: Event) {
+        /*
         let imageWidth = event.srcElement.naturalWidth;
         let imageHeight = event.srcElement.naturalHeight;
   
@@ -25,16 +93,30 @@
             event.srcElement.style.height = "80%";
             event.srcElement.style.width = "auto";
         }
+        */
 
         // error if the window gets too thin but whatever
     }
-  
-     
+
+    export function getImageUrl(): string {
+        return imageSrc;
+    }
+
+    onMount(() => {
+        recomputeImageResolution(); // resize the initial blank image
+    });
 </script>
 
 <div id="preview-container">
     <div id="preview-image-container">
-        <img id="preview-image" src={imageSrc} on:load={scaleImage} />
+        <div style="width: {imageWidth}px; height: {imageHeight}px;" >
+            <img id="preview-image" src={imageSrc} on:load={scaleImage} style="width: {imageWidth}px; height: {imageHeight}px;" />
+            {#if renderLoadingOverlay}
+                <div class="preview-overlay" style="width: {imageWidth}px; height: {imageHeight}px;" in:fade={{ duration: 250 }}>
+                    <Pulse size="34" color="#EEEEEE" unit="px" duration="1s" />
+                </div>
+            {/if}
+        </div>
     </div>
 </div>
 
@@ -59,10 +141,20 @@
     }
 
     #preview-image {
-        max-width: 80%;
-        max-height: 80%;
-        object-fit: contain;
-         
         box-shadow: 0px 13px 36px -5px rgba(0,0,0,0.15),0px 26px 50px 24px rgba(0,0,0,0.07),0px 8px 18px -1px rgba(0,0,0,0.2);
+        position: absolute;
     }
+
+    
+    /* used by error + loading overlays */
+    .preview-overlay {
+        background-color: #00000070;
+        position: absolute;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+
 </style>

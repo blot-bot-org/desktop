@@ -4,10 +4,16 @@
     import Number from "$components/parameters/Number.svelte";
     import Text from "$components/parameters/Text.svelte";
     import Divider from "$components/parameters/Divider.svelte";
+    import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 
     export let previewRef;
 
-    const initialStyleId = "scribble";
+    const drawStyles = [
+        "cascade",
+        "scribble",
+        "lines",
+    ];
+    const initialStyleId = drawStyles[0]; 
 
     let styleId = "";
     let styleName = "";
@@ -16,13 +22,13 @@
     async function make_preview(event: Event) {
         if(event) event.preventDefault();
 
-        await previewRef.gen_preview(parameterObject);
+        await previewRef.gen_preview(styleId, parameterObject);
     }
 
-    async function switchStyle(newStyle) {
+    async function switchStyle(newStyleId) {
         parameterObject = {};
 
-        styleId = newStyle;
+        styleId = newStyleId;
         styleName = Parameters[styleId]["name"];
 
         for(let object of Parameters[styleId]["parameters"]) {
@@ -40,7 +46,11 @@
             }
         }
 
-        previewRef.gen_preview(parameterObject);
+        previewRef.gen_preview(styleId, parameterObject);
+    }
+
+    async function print() {
+        await invoke("send_to_firmware", { });
     }
 
     switchStyle(initialStyleId);
@@ -48,7 +58,20 @@
 
 
 <div id="dashboard">
-    <button on:click={make_preview}>Generate preview</button>
+    
+    <div class="style-container">
+        <select bind:value={styleId} onchange={() => switchStyle(styleId)} >
+            {#each drawStyles as dsid}
+                <option value={dsid}>
+                    {Parameters[dsid]["name"]}
+                </option>
+            {/each}
+        </select>
+
+    </div>
+
+    <Divider />
+
     <div class="parameter-container">
         {#each Parameters[styleId]["parameters"] as param}
             {#if param.type == "slider"}
@@ -61,6 +84,7 @@
             <Divider />
         {/each}
     </div>
+    <button onclick={print}>Print</button>
 </div>
 
 
@@ -70,7 +94,7 @@
         height: 100%;
     }
 
-    .parameter-container {
+    .parameter-container, .style-container {
         margin: 20px;
     }
 

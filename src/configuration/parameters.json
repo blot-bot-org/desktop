@@ -100,6 +100,15 @@
                 "min": -1.0,
                 "max": 1.0,
                 "default": 0.05
+            },
+            {
+                "name":"Scribble Size",
+                "id":"scribble_size",
+                "description":"The size of the scribbles",
+                "type":"slider",
+                "min":1,
+                "max":100,
+                "default":50
             }
         ]
     }
