@@ -50,7 +50,11 @@
     }
 
     async function print() {
-        await invoke("send_to_firmware", { });
+        await invoke("send_to_firmware", {});
+    }
+
+    async function pause() {
+        await invoke("pause_firmware", {});
     }
 
     switchStyle(initialStyleId);
@@ -85,6 +89,7 @@
         {/each}
     </div>
     <button onclick={print}>Print</button>
+    <button onclick={pause}>Pause</button>
 </div>
 
 

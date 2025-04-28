@@ -7,6 +7,10 @@ use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
 use std::fs::File;
 use std::io::{Read, Write};
+use bbcore::client::state::ClientState;
+use tokio::sync::{Mutex, MutexGuard};
+use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
@@ -51,7 +55,7 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
 }
 
 #[tauri::command(async)]
-fn send_to_firmware(app: tauri::AppHandle) {
+async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
     let ins_file_path = cache_dir.join("instructions.bin");
@@ -61,15 +65,51 @@ fn send_to_firmware(app: tauri::AppHandle) {
 
     match InstructionSet::new(buffer) {
         Ok(val) => { /* TODO draw(val) */ },
-        Err(e) => { println!("{e}"); return; },
+        Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
+
+    let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
+
+    let mut client_lock = state.client.lock().await;
+    *client_lock = Some(client);
+    let client = client_lock.as_mut().unwrap();
+    
+    tokio::spawn(async move {
+        ClientState::listen(client).await;
+    });
+
+    Ok("".to_owned())
+}
+
+
+#[tauri::command(async)]
+async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+    println!("acquiring mutex...");
+    let mut client_lock = state.client.lock().await;
+    println!("got the lock...");
+
+    if let Some(client) = client_lock.as_mut() {
+        println!("SENDING PAUSE...");
+        ClientState::pause(client).await;
+    } else {
+        println!("COULDNT UNWRAP. NO CLIENT OR SOMMING?");
+    }
+
+    Ok("".to_owned())
+}
+
+struct AppState {
+    pub client: Arc<Mutex<Option<ClientState>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let state = AppState { client: Arc::new(Mutex::new(None)) };
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware])
+        .manage(state)
+        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware, pause_firmware])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

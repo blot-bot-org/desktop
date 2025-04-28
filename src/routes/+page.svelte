@@ -2,16 +2,26 @@
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
     import Dashboard from "$components/Dashboard.svelte";
     import Preview from "$components/Preview.svelte";
+    import ClientWindow from "$components/ClientWindow.svelte";
     import Slider from "$components/parameters/Slider.svelte";
 
     let previewRef;
     let dashboardRef;
+
+    setTimeout(() => {
+        console.log(previewRef);
+    }, 500);
 </script>
 
 <main class="container">
     <div id="app">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
         <Preview bind:this={previewRef} />
         <Dashboard bind:this={dashboardRef} previewRef={previewRef} />
+        <!-- <ClientWindow previewRef={previewRef} /> -->
     </div>
 </main>
 
@@ -23,6 +33,9 @@
     * {
         margin: 0;
         padding: 0;
+
+        font-family: "Kantumruy Pro", sans-serif;
+        font-weight: 400;
     }
 
     .container {
