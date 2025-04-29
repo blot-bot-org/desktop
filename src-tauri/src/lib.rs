@@ -7,10 +7,14 @@ use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
 use std::fs::File;
 use std::io::{Read, Write};
-use bbcore::client::state::ClientState;
-use tokio::sync::{Mutex, MutexGuard};
+use tokio::sync::Mutex;
+use tokio::io::{AsyncWriteExt, AsyncReadExt};
+use tokio::net::TcpStream;
+use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf, ReadHalf, WriteHalf};
 use std::sync::Arc;
 use tauri::State;
+use bbcore::client::error::ClientError;
+use bbcore::client::state::ClientState;
 
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
@@ -68,43 +72,45 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
 
+    // create new socket, and split it into owned directions
     let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
-
-    let mut client_lock = state.client.lock().await;
-    *client_lock = Some(client);
-    let client = client_lock.as_mut().unwrap();
+    let (stream_reader, stream_writer) = client.into_split();
     
-    tokio::spawn(async move {
-        ClientState::listen(client).await;
-    });
+    // lock writer, set writer as owned, drop it
+    let mut writer_lock = state.writer.lock().await;
+    *writer_lock = Some(stream_writer);
+    drop(writer_lock);
+
+    // lock reader, set writer as owned, launch listen task
+    let mut reader_lock = state.reader.lock().await;
+    *reader_lock = Some(stream_reader);
+    let reader = reader_lock.as_mut().unwrap();
+
+    ClientState::listen(reader, &state.writer).await;
 
     Ok("".to_owned())
 }
-
 
 #[tauri::command(async)]
 async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
-    println!("acquiring mutex...");
-    let mut client_lock = state.client.lock().await;
-    println!("got the lock...");
+    let mut writer_lock = state.writer.lock().await;
+    let writer = writer_lock.as_mut().unwrap();
 
-    if let Some(client) = client_lock.as_mut() {
-        println!("SENDING PAUSE...");
-        ClientState::pause(client).await;
-    } else {
-        println!("COULDNT UNWRAP. NO CLIENT OR SOMMING?");
-    }
+    ClientState::pause(writer).await;
 
     Ok("".to_owned())
 }
 
-struct AppState {
-    pub client: Arc<Mutex<Option<ClientState>>>,
+
+pub struct AppState {
+    pub writer: Arc<Mutex<Option<OwnedWriteHalf>>>,
+    pub reader: Arc<Mutex<Option<OwnedReadHalf>>>,
+    pub awaiting_pause: Arc<Mutex<bool>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let state = AppState { client: Arc::new(Mutex::new(None)) };
+    let state = AppState { writer: Arc::new(Mutex::new(None)), reader: Arc::new(Mutex::new(None)), awaiting_pause: Arc::new(Mutex::new(false)) };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -113,3 +119,4 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
