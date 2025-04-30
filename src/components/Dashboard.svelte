@@ -9,15 +9,17 @@
     export let previewRef;
 
     const drawStyles = [
+        "lines",
         "cascade",
         "scribble",
-        "lines",
     ];
     const initialStyleId = drawStyles[0]; 
 
     let styleId = "";
     let styleName = "";
     let parameterObject;
+
+    let drawingPaused = false;
     
     async function make_preview(event: Event) {
         if(event) event.preventDefault();
@@ -50,11 +52,18 @@
     }
 
     async function print() {
+        drawingPaused = false;
         await invoke("send_to_firmware", {});
     }
 
     async function pause() {
+        document.getElementById("pause-button").classList.add("disabled-button");
+
         await invoke("pause_firmware", {});
+        drawingPaused = !drawingPaused;
+        await new Promise(r => setTimeout(r, 1000));
+
+        document.getElementById("pause-button").classList.remove("disabled-button");
     }
 
     switchStyle(initialStyleId);
@@ -89,7 +98,7 @@
         {/each}
     </div>
     <button onclick={print}>Print</button>
-    <button onclick={pause}>Pause</button>
+    <button id="pause-button" onclick={pause}>{ drawingPaused ? "Resume" : "Pause" }</button>
 </div>
 
 
@@ -101,6 +110,12 @@
 
     .parameter-container, .style-container {
         margin: 20px;
+    }
+
+
+    :global(.disabled-button) {
+        filter: brightness(70%) saturate(80%);
+        pointer-events: none;
     }
 
     button {

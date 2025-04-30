@@ -5,8 +5,10 @@ use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
+use std::arch::x86_64::__get_cpuid_max;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::ops::{Deref, DerefMut};
 use tokio::sync::Mutex;
 use tokio::io::{AsyncWriteExt, AsyncReadExt};
 use tokio::net::TcpStream;
@@ -66,11 +68,15 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     let mut ins_file = File::open(ins_file_path).unwrap();
     let mut buffer = Vec::new();
     let _ = ins_file.read_to_end(&mut buffer).unwrap();
-
-    match InstructionSet::new(buffer) {
-        Ok(val) => { /* TODO draw(val) */ },
+    
+    let ins_set = match InstructionSet::new(buffer) {
+        Ok(val) => { val },
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
+
+    let mut buf_idx_lock = state.buf_idx.lock().await;
+    *buf_idx_lock = 0;
+    drop(buf_idx_lock);
 
     // create new socket, and split it into owned directions
     let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
@@ -86,7 +92,19 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     *reader_lock = Some(stream_reader);
     let reader = reader_lock.as_mut().unwrap();
 
-    ClientState::listen(reader, &state.writer).await;
+    ClientState::listen(reader, &state.writer, &state.buf_idx, &ins_set).await;
+
+    let mut writer_lock = state.writer.lock().await;
+    *writer_lock = None;
+    *reader_lock = None;
+    let mut paused_lock = state.paused_flag.lock().await;
+    *paused_lock = false;
+
+    drop(paused_lock);
+    drop(writer_lock);
+    drop(reader_lock);
+
+    println!("Cleanly exited drawing.");
 
     Ok("".to_owned())
 }
@@ -96,7 +114,12 @@ async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Re
     let mut writer_lock = state.writer.lock().await;
     let writer = writer_lock.as_mut().unwrap();
 
-    ClientState::pause(writer).await;
+    let mut paused_lock = state.paused_flag.lock().await;
+    *paused_lock.deref_mut() = !(*paused_lock);
+
+    ClientState::pause(writer, *paused_lock).await;
+    
+    // drops occur out of scope
 
     Ok("".to_owned())
 }
@@ -105,12 +128,13 @@ async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Re
 pub struct AppState {
     pub writer: Arc<Mutex<Option<OwnedWriteHalf>>>,
     pub reader: Arc<Mutex<Option<OwnedReadHalf>>>,
-    pub awaiting_pause: Arc<Mutex<bool>>,
+    pub paused_flag: Arc<Mutex<bool>>,
+    pub buf_idx: Arc<Mutex<usize>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let state = AppState { writer: Arc::new(Mutex::new(None)), reader: Arc::new(Mutex::new(None)), awaiting_pause: Arc::new(Mutex::new(false)) };
+    let state = AppState { writer: Arc::new(Mutex::new(None)), reader: Arc::new(Mutex::new(None)), paused_flag: Arc::new(Mutex::new(false)), buf_idx: Arc::new(Mutex::new(0)) };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
