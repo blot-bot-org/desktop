@@ -5,6 +5,11 @@
     import Text from "$components/parameters/Text.svelte";
     import Divider from "$components/parameters/Divider.svelte";
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+    import { listen } from '@tauri-apps/api/event';
+
+    import toast, { Toaster } from 'svelte-french-toast';
+
+
 
     export let previewRef;
 
@@ -53,7 +58,19 @@
 
     async function print() {
         drawingPaused = false;
-        await invoke("send_to_firmware", {});
+        
+        let firmware_progress = await listen<string>("firm-prog", (ev) => { handleToast(JSON.parse(ev["payload"])); });
+
+        await invoke("send_to_firmware"); // this does not propogate errors, they're done through firm-prog channel
+
+        firmware_progress();
+
+        // can do this sorta thing
+        /*
+        invoke("send_to_firmware", {})
+            .then((result) => console.log(result))
+            .catch((err) => alert(err));
+        */
     }
 
     async function pause() {
@@ -64,6 +81,19 @@
         await new Promise(r => setTimeout(r, 1000));
 
         document.getElementById("pause-button").classList.remove("disabled-button");
+    }
+
+    function handleToast(payload: any) {
+        console.log(payload)
+        if(payload["event"] == "connection") {
+            if(payload["error"]) {
+                toast.error("Error: " + payload["message"], { position: "bottom-center", duration: 4000 });
+            } else {
+                toast.success(payload["message"], { position: "bottom-center", duration: 4000 });
+            }
+        } else if(payload["event"] == "drawing") {
+            toast.success(payload["message"], { position: "bottom-center", duration: 4000 });
+        }
     }
 
     switchStyle(initialStyleId);
@@ -99,6 +129,8 @@
     </div>
     <button onclick={print}>Print</button>
     <button id="pause-button" onclick={pause}>{ drawingPaused ? "Resume" : "Pause" }</button>
+
+    <Toaster />
 </div>
 
 

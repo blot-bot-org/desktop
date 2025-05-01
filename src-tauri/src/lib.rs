@@ -14,7 +14,7 @@ use tokio::io::{AsyncWriteExt, AsyncReadExt};
 use tokio::net::TcpStream;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf, ReadHalf, WriteHalf};
 use std::sync::Arc;
-use tauri::State;
+use tauri::{Emitter, Manager, State};
 use bbcore::client::error::ClientError;
 use bbcore::client::state::ClientState;
 
@@ -62,6 +62,9 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
 
 #[tauri::command(async)]
 async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String> {
+
+    let win = app.get_webview_window("main").unwrap();
+
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
     let ins_file_path = cache_dir.join("instructions.bin");
@@ -81,6 +84,8 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     // create new socket, and split it into owned directions
     let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
+
+    win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#);
     
     // lock writer, set writer as owned, drop it
     let mut writer_lock = state.writer.lock().await;
@@ -92,7 +97,7 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     *reader_lock = Some(stream_reader);
     let reader = reader_lock.as_mut().unwrap();
 
-    ClientState::listen(reader, &state.writer, &state.buf_idx, &ins_set).await;
+    ClientState::listen(reader, &state.writer, &state.buf_idx, &ins_set, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
 
     let mut writer_lock = state.writer.lock().await;
     *writer_lock = None;
@@ -117,7 +122,9 @@ async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Re
     let mut paused_lock = state.paused_flag.lock().await;
     *paused_lock.deref_mut() = !(*paused_lock);
 
-    ClientState::pause(writer, *paused_lock).await;
+    let win = app.get_webview_window("main").unwrap();
+
+    ClientState::pause(writer, *paused_lock, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
     
     // drops occur out of scope
 
