@@ -59,7 +59,7 @@
     async function print() {
         drawingPaused = false;
         
-        let firmware_progress = await listen<string>("firm-prog", (ev) => { handleToast(JSON.parse(ev["payload"])); });
+        let firmware_progress = await listen<string>("firm-prog", (ev) => { console.log(ev); handleToast(JSON.parse(ev["payload"])); });
 
         await invoke("send_to_firmware"); // this does not propogate errors, they're done through firm-prog channel
 
