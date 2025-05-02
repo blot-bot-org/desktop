@@ -120,5 +120,91 @@
                 "default":20
             }
         ]
+    },
+    "dunes": {
+        "name":"Dunes",
+        "parameters": [
+            {
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
+                "min": 1,
+                "max": 4294967294,
+                "default": 1000
+            },
+            {
+                "name":"Layer Step Size",
+                "id":"layer_step",
+                "description": "The step size of the layer iterator",
+                "type":"number",
+                "min": 1,
+                "max": 20,
+                "default": 8
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description": "The vertical offset of the pattern",
+                "type":"slider",
+                "min": 0,
+                "max": 200,
+                "default": 80
+            },
+            {
+                "name":"Base Size",
+                "id":"base_size",
+                "description": "The size of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 80
+            },
+            {
+                "name":"Mid Size",
+                "id":"mid_size",
+                "description": "The size of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 30
+            },
+            {
+                "name":"High Size",
+                "id":"high_size",
+                "description": "The size of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 2
+            },
+            {
+                "name":"Base Amplitude",
+                "id":"base_amplitude",
+                "description": "The amplitude of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 220
+            },
+            {
+                "name":"Mid Amplitude",
+                "id":"mid_amplitude",
+                "description": "The amplitude of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 50
+            },
+            {
+                "name":"High Amplitude",
+                "id":"high_amplitude",
+                "description": "The amplitude of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 15
+            }
+        ]
     }
 }

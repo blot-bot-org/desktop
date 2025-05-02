@@ -17,6 +17,7 @@
         "lines",
         "cascade",
         "scribble",
+        "dunes",
     ];
     const initialStyleId = drawStyles[0]; 
 

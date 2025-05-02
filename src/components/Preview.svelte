@@ -68,8 +68,15 @@
             renderLoadingOverlay = true;
         }, 250);
 
-        console.log(style_id)
         let path = await invoke("gen_preview", { styleId: style_id, jsonParams: JSON.stringify(parameter_object) });
+        
+        console.log(path)
+        if(path.startsWith("error")) {
+            alert(path.split(":")[1]);
+            clearTimeout(timeoutRef);
+            return;
+        }
+
         let imageUrl = convertFileSrc(path);
 
         clearTimeout(timeoutRef);
@@ -124,7 +131,7 @@
     #preview-container {
         background-color: #D0D0D0;
         height: 100%;
-        width: 65%; /* master width */
+        width: 65% !important; /* master width */
 
         box-shadow: inset -68px 0px 18px -67px rgba(0,0,0,0.08);
 

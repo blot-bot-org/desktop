@@ -1,49 +1,69 @@
 use bbcore::drawing::lines::{LinesMethod, LinesParameters};
 use bbcore::drawing::cascade::{CascadeMethod, CascadeParameters};
 use bbcore::drawing::scribble::{ScribbleMethod, ScribbleParameters};
+use bbcore::drawing::dunes::{DunesMethod, DunesParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
-use std::arch::x86_64::__get_cpuid_max;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::ops::{Deref, DerefMut};
+use std::ops::{DerefMut};
 use tokio::sync::Mutex;
-use tokio::io::{AsyncWriteExt, AsyncReadExt};
-use tokio::net::TcpStream;
-use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf, ReadHalf, WriteHalf};
+use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use std::sync::Arc;
 use tauri::{Emitter, Manager, State};
-use bbcore::client::error::ClientError;
 use bbcore::client::state::ClientState;
 
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
     
-    let ins_bytes: Vec<u8> = match style_id {
+    let ins_bytes: Result<Vec<u8>, String> = match style_id {
         "cascade" => {
-            let params: CascadeParameters = serde_json::from_str(json_params).unwrap();
+            let params = match serde_json::from_str::<CascadeParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
             let method = CascadeMethod {};
             method.gen_instructions(&phys_dim, &params)
         },
         "lines" => {
-            let params: LinesParameters = serde_json::from_str(json_params).unwrap();
+            let params = match serde_json::from_str::<LinesParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
             let method = LinesMethod {};
             method.gen_instructions(&phys_dim, &params)
         },
         "scribble" => {
-            let params: ScribbleParameters = serde_json::from_str(json_params).unwrap();
+            let params = match serde_json::from_str::<ScribbleParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
             let method = ScribbleMethod {};
+            method.gen_instructions(&phys_dim, &params)
+        },
+        "dunes" => {
+            let params = match serde_json::from_str::<DunesParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
+            let method = DunesMethod {};
             method.gen_instructions(&phys_dim, &params)
         }
         _ => {
-            vec![]
+            Err("error:Unknown draw type".to_owned())
         }
     };
 
-    let instruction_set = InstructionSet::new(ins_bytes).unwrap();
+    if let Err(err_str) = ins_bytes {
+
+        return format!("error:{}", err_str).to_owned();
+
+    }
+
+    let instruction_set = InstructionSet::new(ins_bytes.unwrap()).unwrap();
 
     // directory handling
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
@@ -85,7 +105,7 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
 
-    win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#);
+    win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#).unwrap();
     
     // lock writer, set writer as owned, drop it
     let mut writer_lock = state.writer.lock().await;
