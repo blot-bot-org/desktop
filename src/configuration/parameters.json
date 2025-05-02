@@ -134,22 +134,49 @@
                 "default": 1000
             },
             {
-                "name":"Layer Step Size",
-                "id":"layer_step",
-                "description": "The step size of the layer iterator",
+                "name":"Layer Count",
+                "id":"layers",
+                "description": "The number of layers",
+                "type":"number",
+                "min": 20,
+                "max": 300,
+                "default": 100
+            },
+            {
+                "name":"Wave Detail",
+                "id":"sample_per_mm",
+                "description": "The number of samples per drawing millimetre",
                 "type":"number",
                 "min": 1,
-                "max": 20,
-                "default": 8
+                "max": 10,
+                "default": 4
+            },
+            {
+                "name":"Width",
+                "id":"width",
+                "description": "The width of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 210,
+                "default": 180
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description": "The height of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 297,
+                "default": 260
             },
             {
                 "name":"Vertical Offset",
                 "id":"vertical_offset",
-                "description": "The vertical offset of the pattern",
-                "type":"slider",
-                "min": 0,
-                "max": 200,
-                "default": 80
+                "description": "A vertical offset for the entire drawing",
+                "type":"number",
+                "min": -1000,
+                "max": 1000,
+                "default": 0
             },
             {
                 "name":"Base Size",
