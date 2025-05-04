@@ -79,16 +79,22 @@
         document.getElementById("pause-button").classList.remove("disabled-button");
     }
 
+    async function moveToStart() {
+        await invoke("move_pen_to_start", {});
+    }
+
     function handleToast(payload: any) {
-        console.log(payload)
+
+        const toast_duration = 10E3 * 30;
+            
         if(payload["event"] == "connection") {
             if(payload["error"]) {
-                toast.error("Error: " + payload["message"], { position: "bottom-center", duration: 4000 });
+                toast.error("Error: " + payload["message"], { position: "bottom-center", duration: toast_duration });
             } else {
-                toast.success(payload["message"], { position: "bottom-center", duration: 4000 });
+                toast.success(payload["message"], { position: "bottom-center", duration: toast_duration });
             }
         } else if(payload["event"] == "drawing") {
-            toast.success(payload["message"], { position: "bottom-center", duration: 4000 });
+            toast.success(payload["message"], { position: "bottom-center", duration: toast_duration });
         }
     }
 
@@ -125,6 +131,7 @@
     </div>
     <button onclick={print}>Print</button>
     <button id="pause-button" onclick={pause}>{ drawingPaused ? "Resume" : "Pause" }</button>
+    <button id="move-to-start" onclick={moveToStart}>Move To Start</button>
 
     <Toaster />
 </div>
