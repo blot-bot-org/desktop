@@ -13,12 +13,7 @@
 
     export let previewRef;
 
-    const drawStyles = [
-        "lines",
-        "cascade",
-        "scribble",
-        "dunes",
-    ];
+    const drawStyles = Object.keys(Parameters);
     const initialStyleId = drawStyles[0]; 
 
     let styleId = "";

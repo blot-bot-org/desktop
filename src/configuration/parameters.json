@@ -212,7 +212,129 @@
                 "type":"slider",
                 "min": 1,
                 "max": 254,
-                "default": 220
+                "default": 180
+            },
+            {
+                "name":"Mid Amplitude",
+                "id":"mid_amplitude",
+                "description": "The amplitude of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 50
+            },
+            {
+                "name":"High Amplitude",
+                "id":"high_amplitude",
+                "description": "The amplitude of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 15
+            }
+        ]
+    },
+    "islands": {
+        "name":"Islands",
+        "parameters": [
+            {
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
+                "min": 1,
+                "max": 4294967294,
+                "default": 1000
+            },
+            {
+                "name":"Layer Count",
+                "id":"layers",
+                "description": "The number of layers",
+                "type":"number",
+                "min": 20,
+                "max": 300,
+                "default": 100
+            },
+            {
+                "name":"Wave Detail",
+                "id":"sample_per_mm",
+                "description": "The number of samples per drawing millimetre",
+                "type":"number",
+                "min": 1,
+                "max": 10,
+                "default": 4
+            },
+            {
+                "name":"Width",
+                "id":"width",
+                "description": "The width of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 210,
+                "default": 180
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description": "The height of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 297,
+                "default": 260
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description": "A vertical offset for the entire drawing",
+                "type":"number",
+                "min": -1000,
+                "max": 1000,
+                "default": 0
+            },
+            {
+                "name":"Ocean Height",
+                "id":"ocean_height",
+                "description": "The height of the ocean around the islands",
+                "type":"slider",
+                "min": 0,
+                "max": 255,
+                "default": 180
+            },
+            {
+                "name":"Base Size",
+                "id":"base_size",
+                "description": "The size of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 80
+            },
+            {
+                "name":"Mid Size",
+                "id":"mid_size",
+                "description": "The size of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 30
+            },
+            {
+                "name":"High Size",
+                "id":"high_size",
+                "description": "The size of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 2
+            },
+            {
+                "name":"Base Amplitude",
+                "id":"base_amplitude",
+                "description": "The amplitude of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 180
             },
             {
                 "name":"Mid Amplitude",
