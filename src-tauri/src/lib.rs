@@ -8,7 +8,7 @@ use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{BufReader, Read, Write};
 use std::ops::DerefMut;
 use tokio::sync::Mutex;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
@@ -20,7 +20,7 @@ use bbcore::client::state::ClientState;
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
     
-    let ins_bytes: Result<Vec<u8>, String> = match style_id {
+    let ins_bytes: Result<(Vec<u8>, f64, f64), String> = match style_id {
         "cascade" => {
             let params = match serde_json::from_str::<CascadeParameters>(json_params) {
                 Ok(val) => val,
@@ -72,7 +72,10 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
 
     }
 
-    let instruction_set = InstructionSet::new(ins_bytes.unwrap()).unwrap();
+    let instruction_set = match ins_bytes {
+        Ok((bytes, ix, iy)) => InstructionSet::new(bytes, ix, iy).unwrap(),
+        Err(str) => { panic!("{}", str); }
+    };
 
     // directory handling
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
@@ -82,12 +85,18 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
     let mut ins_file = File::create(ins_file_path).unwrap();
     let _ = ins_file.write_all(instruction_set.get_binary().as_slice());
 
+    let start_file_path = cache_dir.join("start.bin");
+    let mut start_file = File::create(start_file_path).unwrap();
+    let _ = start_file.write_all(format!("{} {}", instruction_set.get_init().0, instruction_set.get_init().1).as_bytes());
+
     let preview_path = cache_dir.join("preview.png");
 
-    generate_preview((0., 0.), &phys_dim, &instruction_set, preview_path.to_str().unwrap());
+    generate_preview((instruction_set.get_init().0, instruction_set.get_init().1), &phys_dim, &instruction_set, preview_path.to_str().unwrap());
 
     preview_path.to_str().unwrap().to_owned()
 }
+
+
 
 #[tauri::command(async)]
 async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String> {
@@ -100,8 +109,8 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     let mut ins_file = File::open(ins_file_path).unwrap();
     let mut buffer = Vec::new();
     let _ = ins_file.read_to_end(&mut buffer).unwrap();
-    
-    let ins_set = match InstructionSet::new(buffer) {
+
+    let ins_set = match InstructionSet::new(buffer, 0., 0.) { 
         Ok(val) => { val },
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
@@ -111,7 +120,7 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     drop(buf_idx_lock);
 
     // create new socket, and split it into owned directions
-    let client = ClientState::new("192.168.0.16", 8180).await.unwrap();
+    let (client, machine_config) = ClientState::new("192.168.0.16", 8180).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
 
     win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#).unwrap();
@@ -126,7 +135,7 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     *reader_lock = Some(stream_reader);
     let reader = reader_lock.as_mut().unwrap();
 
-    ClientState::listen(reader, &state.writer, &state.buf_idx, &ins_set, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
+    ClientState::listen(reader, &state.writer, &state.buf_idx, &ins_set, &machine_config, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
 
     let mut writer_lock = state.writer.lock().await;
     *writer_lock = None;
@@ -145,6 +154,7 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
 
 #[tauri::command(async)]
 async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+
     let mut writer_lock = state.writer.lock().await;
     let writer = writer_lock.as_mut().unwrap();
 
@@ -156,6 +166,21 @@ async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Re
     ClientState::pause(writer, *paused_lock, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
     
     // drops occur out of scope
+
+    Ok("".to_owned())
+}
+
+#[tauri::command(async)]
+async fn move_pen_to_start(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let start_file_path = cache_dir.join("start.bin");
+    let start_file = File::open(start_file_path).unwrap();
+    let mut start_contents = String::new();
+    BufReader::new(start_file).read_to_string(&mut start_contents).unwrap();
+    let start_pos: Vec<f64> = start_contents.split_whitespace().filter_map(|s| s.parse::<f64>().ok()).collect();
+    let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
+    bbcore::client::move_to_start("192.168.0.16", 8180, &phys_dim, start_pos[0], start_pos[1]).unwrap();
 
     Ok("".to_owned())
 }
@@ -175,7 +200,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(state)
-        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware, pause_firmware])
+        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware, pause_firmware, move_pen_to_start])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
