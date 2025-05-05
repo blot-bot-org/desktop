@@ -15,6 +15,7 @@ use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use std::sync::Arc;
 use tauri::{Emitter, Manager, State};
 use bbcore::client::state::ClientState;
+use bbcore::client::calculate_draw_time;
 
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
@@ -119,11 +120,16 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     *buf_idx_lock = 0;
     drop(buf_idx_lock);
 
+
+    win.emit("firm-prog", format!(r#"{{"event":"populate_network", "address":"{}"}}"#, "192.168.0.16:8180")).unwrap();
+    win.emit("firm-prog", format!(r#"{{"event":"populate_draw", "totalBytes":"{}"}}"#, ins_set.get_binary().len())).unwrap();
+
     // create new socket, and split it into owned directions
     let (client, machine_config) = ClientState::new("192.168.0.16", 8180).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
 
     win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#).unwrap();
+    win.emit("firm-prog", format!(r#"{{"event":"populate_machine", "insBytes":"{}", "stepSpeed":"{}", "pulseWidth":"{}", "protocol":"{}"}}"#, machine_config.instruction_buffer_size, machine_config.max_motor_speed, machine_config.min_pulse_width, machine_config.protocol_version)).unwrap();
     
     // lock writer, set writer as owned, drop it
     let mut writer_lock = state.writer.lock().await;
@@ -180,11 +186,12 @@ async fn move_pen_to_start(app: tauri::AppHandle, state: State<'_, AppState>) ->
     BufReader::new(start_file).read_to_string(&mut start_contents).unwrap();
     let start_pos: Vec<f64> = start_contents.split_whitespace().filter_map(|s| s.parse::<f64>().ok()).collect();
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
-    bbcore::client::move_to_start("192.168.0.16", 8180, &phys_dim, start_pos[0], start_pos[1]).unwrap();
+    if let Err(str) = bbcore::client::move_to_start("192.168.0.16", 8180, &phys_dim, start_pos[0], start_pos[1]) {
+        return Err(str.to_string().to_owned());
+    }
 
     Ok("".to_owned())
 }
-
 
 pub struct AppState {
     pub writer: Arc<Mutex<Option<OwnedWriteHalf>>>,
