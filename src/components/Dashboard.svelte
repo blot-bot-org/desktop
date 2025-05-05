@@ -9,23 +9,25 @@
 
     import toast, { Toaster } from 'svelte-french-toast';
 
-
-
-    export let previewRef;
+    const props: {
+        printPressed(): void;
+        pausePressed(): void;
+        onStateChange(styleId: string, parameterObject: any): void;
+    } = $props(); 
 
     const drawStyles = Object.keys(Parameters);
     const initialStyleId = drawStyles[0]; 
 
-    let styleId = "";
-    let styleName = "";
-    let parameterObject;
+    let styleId = $state("");
+    let styleName = $state("");
+    let parameterObject = $state({});
 
     let drawingPaused = false;
     
     async function make_preview(event: Event) {
         if(event) event.preventDefault();
 
-        await previewRef.gen_preview(styleId, parameterObject);
+        props.onStateChange(styleId, parameterObject);
     }
 
     async function switchStyle(newStyleId) {
@@ -38,21 +40,11 @@
             parameterObject[object.id] = object.default;
         }
         
-        let i = 0;
-        while (previewRef == undefined) {
-            await new Promise(r => setTimeout(r, 10));
-            i += 1;
-
-            if (i > 1000) { // 10 seconds
-                console.log("Error! `previewRef` was never intialised in dashboard");
-                break;
-            }
-        }
-
-        previewRef.gen_preview(styleId, parameterObject);
+        props.onStateChange(styleId, parameterObject);
     }
 
     async function print() {
+        /*
         drawingPaused = false;
         
         let firmware_progress = await listen<string>("firm-prog", (ev) => { console.log(ev); handleToast(JSON.parse(ev["payload"])); });
@@ -62,14 +54,18 @@
         firmware_progress();
 
         // can do this sorta thing
-        /*
         invoke("send_to_firmware", {})
             .then((result) => console.log(result))
             .catch((err) => alert(err));
         */
+
+        props.printPressed();
     }
 
     async function pause() {
+        props.pausePressed();
+
+        /*
         document.getElementById("pause-button").classList.add("disabled-button");
 
         await invoke("pause_firmware", {});
@@ -77,6 +73,7 @@
         await new Promise(r => setTimeout(r, 1000));
 
         document.getElementById("pause-button").classList.remove("disabled-button");
+        */
     }
 
     async function moveToStart() {

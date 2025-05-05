@@ -61,8 +61,13 @@
     let renderLoadingOverlay = $state(true);
   
     export async function gen_preview(style_id, parameter_object) {
-        // console.log(`Invoking preview function with obj:`);
-        // console.log(parameter_object);
+        if(style_id == undefined || parameter_object == undefined) {
+            console.log("Could not generate preview as style or parameters were undefined.");
+            return;
+        }
+
+        console.log(`Invoking preview ${style_id} function with obj:`);
+        console.log(parameter_object);
 
         let timeoutRef = setTimeout(() => {
             renderLoadingOverlay = true;

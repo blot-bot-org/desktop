@@ -8,9 +8,13 @@
     let previewRef;
     let dashboardRef;
 
+    let showingModal = false;
+
     setTimeout(() => {
         console.log(previewRef);
     }, 500);
+
+
 </script>
 
 <main class="container">
@@ -20,8 +24,14 @@
         <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 
         <Preview bind:this={previewRef} />
-        <Dashboard bind:this={dashboardRef} previewRef={previewRef} />
-        <!-- <ClientWindow previewRef={previewRef} /> -->
+
+        {#if previewRef} <!-- used to defer loading until preview_ref is initialised -->
+        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} />
+        {/if}
+        
+        {#if showingModal && previewRef}
+            <ClientWindow previewRef={previewRef} dashboardRef={dashboardRef} close={() => { showingModal = false; }} />
+        {/if}
     </div>
 </main>
 
