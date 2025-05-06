@@ -148,10 +148,13 @@ async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     *reader_lock = None;
     let mut paused_lock = state.paused_flag.lock().await;
     *paused_lock = false;
+    let mut buf_idx_lock = state.buf_idx.lock().await;
+    *buf_idx_lock = 0;
 
     drop(paused_lock);
     drop(writer_lock);
     drop(reader_lock);
+    drop(buf_idx_lock);
 
     println!("Cleanly exited drawing.");
 
@@ -193,6 +196,22 @@ async fn move_pen_to_start(app: tauri::AppHandle, state: State<'_, AppState>) ->
     Ok("".to_owned())
 }
 
+#[tauri::command(async)]
+async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+    
+    let win = app.get_webview_window("main").unwrap();
+
+    let mut writer_lock = state.writer.lock().await;
+    let writer = writer_lock.as_mut().unwrap();
+    
+    ClientState::stop(writer, move |msg| { let _ = win.emit("firm-prog", msg.as_str()); }).await;
+
+    // will finish ClientState::listen in other thread
+
+    Ok("".to_owned())
+
+}
+
 pub struct AppState {
     pub writer: Arc<Mutex<Option<OwnedWriteHalf>>>,
     pub reader: Arc<Mutex<Option<OwnedReadHalf>>>,
@@ -207,7 +226,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(state)
-        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware, pause_firmware, move_pen_to_start])
+        .invoke_handler(tauri::generate_handler![gen_preview, send_to_firmware, pause_firmware, move_pen_to_start, stop_drawing])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
