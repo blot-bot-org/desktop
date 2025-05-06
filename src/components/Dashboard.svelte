@@ -44,40 +44,7 @@
     }
 
     async function print() {
-        /*
-        drawingPaused = false;
-        
-        let firmware_progress = await listen<string>("firm-prog", (ev) => { console.log(ev); handleToast(JSON.parse(ev["payload"])); });
-
-        await invoke("send_to_firmware"); // this does not propogate errors, they're done through firm-prog channel
-
-        firmware_progress();
-
-        // can do this sorta thing
-        invoke("send_to_firmware", {})
-            .then((result) => console.log(result))
-            .catch((err) => alert(err));
-        */
-
         props.printPressed();
-    }
-
-    async function pause() {
-        props.pausePressed();
-
-        /*
-        document.getElementById("pause-button").classList.add("disabled-button");
-
-        await invoke("pause_firmware", {});
-        drawingPaused = !drawingPaused;
-        await new Promise(r => setTimeout(r, 1000));
-
-        document.getElementById("pause-button").classList.remove("disabled-button");
-        */
-    }
-
-    async function moveToStart() {
-        await invoke("move_pen_to_start", {});
     }
 
     function handleToast(payload: any) {
@@ -126,9 +93,7 @@
             <Divider />
         {/each}
     </div>
-    <button onclick={print}>Print</button>
-    <button id="pause-button" onclick={pause}>{ drawingPaused ? "Resume" : "Pause" }</button>
-    <button id="move-to-start" onclick={moveToStart}>Move To Start</button>
+    <button style="" onclick={print}>Print</button>
 
     <Toaster />
 </div>
@@ -138,6 +103,9 @@
     #dashboard {
         flex-grow: 1;
         height: 100%;
+
+        display: flex;
+        flex-direction: column;
     }
 
     .parameter-container, .style-container {
@@ -163,6 +131,8 @@
         outline: none;
 
         transition: 0.2s;
+
+        align-self: flex-end;
     }
 
     button:hover {

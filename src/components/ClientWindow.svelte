@@ -2,6 +2,8 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
 
+    import Icon from "@iconify/svelte";
+
     import DrawingModal from "./DrawingModal.svelte";
 
     const props: {
@@ -24,24 +26,34 @@
     let mcPulseWidth = $state("");
     let mcProtocol = $state("");
 
+    let progressPercentage = $state(0);
+
 
     let drawingPaused = $state(false);
+    let drawingFinished = $state(false);
 
     let secondsElapsed = 0;
     let secondsRemaining = 0;
     let bySecondUpdateInterval = undefined;
 
-
+    
 
     async function startDrawing() {
+        while(document.getElementById("modal-preview-img") == null) { await new Promise(p => setTimeout(p, 50)); }
+
+        drawingFinished = false;
         secondsElapsed = 0;
         secondsRemaining = 0;
-        if(bySecondUpdateInterval != undefined) {
+        progressPercentage = 0;
+        drawingPaused = false;
+        progressPercentage = 0;
+
+        try {
             clearInterval(bySecondUpdateInterval);
-        }
+        } catch {}
 
         // initialise bits and bobs
-        // document.getElementById("modal-preview-img").src = props.previewRef.getImageUrl();
+        document.getElementById("modal-preview-img").src = props.previewRef.getImageUrl();
         const emptyParams: UpdateWindowParams = {
             _msState: "Connecting",
             _msAddress: "...",
@@ -57,14 +69,28 @@
         updateWindow(emptyParams);
 
 
-
-        
         // start progress listener
-        let firmware_progress = await listen<string>("firm-prog", (ev) => { try { handleProgress(JSON.parse(ev.payload)); } catch { console.error(ev); } });
+        let firmware_progress = await listen<string>("firm-prog", (ev) => { try { handleProgress(JSON.parse(ev.payload)); return; } catch { console.error("Error parsing JSON, or handling response."); console.error(ev); } });
         await invoke("send_to_firmware"); // call drawing function
 
         firmware_progress(); // cancels listener
     }
+
+    async function pauseDrawing() {
+        if(!drawingFinished && isDrawing) {
+            await invoke("pause_firmware");
+
+            drawingPaused = !drawingPaused;
+        }
+    }
+
+    async function stopDrawing() {
+        if(!drawingFinished && isDrawing) {
+            await invoke("stop_drawing");
+        }
+    }
+
+
 
     function handleProgress(payload) {
         console.log(payload)
@@ -98,6 +124,42 @@
             updateWindow({ _drInstructionIdx: payload["ins_pos"] });
 
         }
+
+        if(payload["event"] == "drawing_finished") {
+
+            drawingFinished = true;
+
+            clearInterval(bySecondUpdateInterval);
+            secondsRemaining = 0;
+            progressPercentage = Math.round((secondsElapsed / Math.max(1, secondsElapsed + secondsRemaining)) * 10000);
+            updateWindow({ _msState: "Disconnected (finished)", _drTimeRemaining: "00:00:00" });
+            
+        }
+
+        if(payload["event"] == "pause") {
+            if(payload["is_paused"] == "1") {
+
+                try {
+                    clearInterval(bySecondUpdateInterval);
+                } catch {}
+                updateWindow({ _msState: "Paused" });
+
+            } else {
+                try {
+                    bySecondUpdateInterval = setInterval(bySecondUpdate, 1000);
+                } catch {}
+                updateWindow({ _msState: "Drawing" });
+            }
+        }
+
+        if(payload["event"] == "shutdown") {
+
+            drawingFinished = true;
+            clearInterval(bySecondUpdateInterval);
+            secondsRemaining = 0;
+            updateWindow({ _msState: "Disconnected (cancelled)", _drTimeRemaining: "00:00:00" });
+
+        }
     }
 
     function bySecondUpdate() {
@@ -110,9 +172,14 @@
 
         updateWindow({ _drTimeElapsed: `${hours}:${minutes}:${seconds}`, _drTimeRemaining: `${remainingHours}:${remainingMinutes}:${remainingSeconds}` });
 
+        // get percentage complete
+        progressPercentage = Math.round((secondsElapsed / Math.max(1, secondsElapsed + secondsRemaining)) * 10000);
+
         secondsElapsed += 1;
         secondsRemaining = Math.max(secondsRemaining - 1, 0);
     }
+
+
 
     type UpdateWindowParams = {
         _msState?: string;
@@ -141,7 +208,7 @@
             _mcProtocol,
         } = params;
 
-        if(_msState != undefined) { msState = _msState; };
+        if(_msState != undefined) { msState = _msState };
         if(_msAddress != undefined) { msAddress = _msAddress };
         if(_drInstructionIdx != undefined) { drInstructionIdx = _drInstructionIdx };
         if(_drTotalInstructions != undefined) { drTotalInstructions = _drTotalInstructions };
@@ -155,7 +222,7 @@
 
     setTimeout(() => {
         // startDrawing();
-    }, 100);
+    }, 5000);
 </script>
 
 {#if isDrawing || isIntro}
@@ -233,11 +300,38 @@
 
         <!-- progress bar and buttons -->
         <div class="buttons-progress">
+            <div id="control-container">
+                
+                {#if !drawingFinished}
+                <button class="control-button {drawingPaused ? "play-state" : "pause-state"}" onclick={pauseDrawing}>
+                    {#if drawingPaused}
+                        <Icon icon="material-symbols:play-arrow-rounded" width="32" height="32" />
+                    {:else}
+                        <Icon icon="material-symbols:pause-rounded" width="32" height="32" />
+                    {/if}
+                </button>
+                <button class="control-button stop-state" onclick={stopDrawing}>
+                    <Icon icon="material-symbols:stop-rounded" width="32" height="32" />
+                </button>
+                {:else}
+                <button class="control-button stop-state" onclick={props.close}>
+                    <Icon icon="material-symbols:close-rounded" width="32" height="32" />
+                </button>
+                {/if}
+
+            </div>
+            <div id="progress-container">
+                <div id="progress-time">
+                    <a class="progress-time-text" id="progress-time-start">{drTimeElapsed}</a>
+                    <a class="progress-time-text" id="progress-time-remaining">{drTimeRemaining}</a>
+                </div>
+                <progress id="progress-bar" max="10000" value={progressPercentage} />
+            </div>
         </div>
         {:else if isIntro}
             <DrawingModal 
-                onDraw={() => { console.log("drawing"); isIntro = false; isDrawing = true; startDrawing(); }}
-                onError={() => { console.log("EREROR!"); isIntro = false; props.close(); }}
+                onDraw={() => { isIntro = false; isDrawing = true; startDrawing(); }}
+                onError={() => { isIntro = false; props.close(); }}
             />
         {/if}
 
@@ -295,12 +389,124 @@
         width: 100%;
         height: 88%;
     }
+
+
+
+
     
     .buttons-progress {
-        background-color: green;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
         width: 100%;
         height: 12%;
+    }
+
+    #control-container {
+        width: calc(120px - 32px);
+        height: 100%;
+
+        padding: 16px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .control-button {
+        width: 38px;
+        height: 38px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        box-shadow: 0px 3px 8px -2px rgba(0,0,0,0.2);
+
+        transition: 0.25s;
+    }
+
+    .control-button:hover {
+        cursor: pointer;
+
+        box-shadow: 0px 3px 10px -1px rgba(0,0,0,0.25);
+
+        filter: brightness(92%);
+    }
+
+    .pause-state {
+        color: #333333;
+        background-color: #f5e8dc;
+        border: 1px solid #f2a35a;
+        border-radius: 5px;
+    }
+
+    .stop-state {
+        color: #333333;
+        background-color: #f2cac9;
+        border: 1px solid #e84946;
+        border-radius: 5px;
+    }
+
+    .play-state {
+        color: #333333;
+        background-color: #d8f2db;
+        border: 1px solid #51c45e;
+        border-radius: 5px;
+    }
+
+
+
+
+
+
+
+
+    #progress-container {
+        flex-grow: 1;
+    }
+
+    #progress-container progress[value] {
+        -webkit-appearance: none;
+        appearance: none;
+
+        height: 6px;
+        width: calc(100% - 40px);
+        margin: 0px 20px 20px 20px;
+    }
+
+    #progress-container progress::-webkit-progress-value {
+        background-image:
+	        -webkit-linear-gradient(top, #ffffff50, #00000050);
+        background-color: #64b6e8;
+
+        border-radius: 3px;
+    }
+
+    #progress-container progress::-webkit-progress-bar {
+        background-color: #d0d0d0;
+        border-radius: 3px;
+
+        box-shadow: 0px 3px 8px -2px rgba(0,0,0,0.2);
+    }
+
+    #progress-time {
+        width: calc(100% - 40px);
+        height: 16px;
+
+        margin: 5px 20px 0px 20px;
+
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .progress-time-text {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        
+        color: #d0d0d0;
     }
 
     .stat-container {
