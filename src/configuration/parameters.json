@@ -71,6 +71,57 @@
             }
         ]
     },
+    "waves": {
+        "name":"Waves",
+        "parameters": [
+            {
+                "name":"Number of Waves",
+                "id":"num_waves",
+                "description": "The number of sine waves to layer",
+                "type": "number",
+                "min": 5,
+                "max": 500,
+                "default": 50
+            },
+            {
+                "name":"Horizontal Samples",
+                "id":"horizontal_samples",
+                "description": "The number of samples taken per row of the image",
+                "type": "number",
+                "min": 10,
+                "max": 500,
+                "default": 50
+            },
+            {
+                "name":"Horizontal Margin",
+                "id":"horizontal_margin",
+                "description": "The horizontal margin of the pattern, in millimetres",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            },
+            {
+                "name":"Vertical Margin",
+                "id":"vertical_margin",
+                "description": "The vertical margin of the pattern, in millimeters",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            },
+            {
+                "name":"Wave Amplification",
+                "id":"wave_amplifier",
+                "description": "The amplification coefficient of the sine waves",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            }
+
+        ]
+    },
     "bubbles": {
         "name":"Bubbles",
         "parameters": [

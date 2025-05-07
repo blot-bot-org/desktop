@@ -4,6 +4,7 @@ use bbcore::drawing::scribble::{ScribbleMethod, ScribbleParameters};
 use bbcore::drawing::dunes::{DunesMethod, DunesParameters};
 use bbcore::drawing::islands::{IslandsMethod, IslandsParameters};
 use bbcore::drawing::bubbles::{BubblesMethod, BubblesParameters};
+use bbcore::drawing::waves::{WavesMethod, WavesParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
@@ -68,6 +69,14 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
                 Err(err) => return "error:".to_owned() + err.to_string().as_str(),
             };
             let method = IslandsMethod {};
+            method.gen_instructions(&phys_dim, &params)
+        },
+        "waves" => {
+            let params = match serde_json::from_str::<WavesParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
+            let method = WavesMethod {};
             method.gen_instructions(&phys_dim, &params)
         },
         _ => {
