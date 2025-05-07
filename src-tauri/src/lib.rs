@@ -3,6 +3,7 @@ use bbcore::drawing::cascade::{CascadeMethod, CascadeParameters};
 use bbcore::drawing::scribble::{ScribbleMethod, ScribbleParameters};
 use bbcore::drawing::dunes::{DunesMethod, DunesParameters};
 use bbcore::drawing::islands::{IslandsMethod, IslandsParameters};
+use bbcore::drawing::bubbles::{BubblesMethod, BubblesParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
@@ -15,7 +16,6 @@ use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use std::sync::Arc;
 use tauri::{Emitter, Manager, State};
 use bbcore::client::state::ClientState;
-use bbcore::client::calculate_draw_time;
 
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
@@ -36,6 +36,14 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
                 Err(err) => return "error:".to_owned() + err.to_string().as_str(),
             };
             let method = LinesMethod {};
+            method.gen_instructions(&phys_dim, &params)
+        },
+        "bubbles" => {
+            let params = match serde_json::from_str::<BubblesParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
+            let method = BubblesMethod {};
             method.gen_instructions(&phys_dim, &params)
         },
         "scribble" => {

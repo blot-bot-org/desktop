@@ -71,16 +71,61 @@
             }
         ]
     },
-    "scribble": {
-        "name":"Scribbles",
+    "bubbles": {
+        "name":"Bubbles",
         "parameters": [
+            {
+                "name":"Width",
+                "id":"width",
+                "description":"The width of the drawing",
+                "type":"number",
+                "min":20,
+                "max":1000,
+                "default":150
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description":"The height of the drawing",
+                "type":"number",
+                "min":20,
+                "max":1000,
+                "default":150
+            },
+            {
+                "name":"Horizontal Offset",
+                "id":"horizontal_offset",
+                "description":"The horizontal offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description":"The vertical offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Brightness Threshold",
+                "id":"brightness_threshold",
+                "description":"The value below which stippled points are seeded",
+                "type":"slider",
+                "min":0,
+                "max":255,
+                "default":120
+            },
             {
                 "name":"Stipple Count",
                 "id":"num_stipples",
                 "description": "The number of stipple points",
                 "type":"slider",
                 "min": 500,
-                "max": 10000,
+                "max": 20000,
                 "default": 1000
             },
             {
@@ -99,7 +144,84 @@
                 "type":"slider",
                 "min": 1,
                 "max": 100,
+                "default": 60
+            }
+        ]
+    },
+    "scribble": {
+        "name":"Scribbles",
+        "parameters": [
+            {
+                "name":"Width",
+                "id":"width",
+                "description":"The width of the drawing",
+                "type":"number",
+                "min":20,
+                "max":1000,
+                "default":150
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description":"The height of the drawing",
+                "type":"number",
+                "min":20,
+                "max":1000,
+                "default":150
+            },
+            {
+                "name":"Horizontal Offset",
+                "id":"horizontal_offset",
+                "description":"The horizontal offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description":"The vertical offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Brightness Threshold",
+                "id":"brightness_threshold",
+                "description":"The value below which stippled points are seeded",
+                "type":"slider",
+                "min":0,
+                "max":255,
+                "default":120
+            },
+            {
+                "name":"Stipple Count",
+                "id":"num_stipples",
+                "description": "The number of stipple points",
+                "type":"slider",
+                "min": 500,
+                "max": 20000,
+                "default": 1000
+            },
+            {
+                "name":"Relaxation Iterations",
+                "id":"num_iterations",
+                "description": "The number of iterations of Lloyd's relaxation performed on the points",
+                "type":"slider",
+                "min": 1,
+                "max": 250,
                 "default": 5
+            },
+            {
+                "name":"Relaxation Tendency",
+                "id":"relaxation_tendency",
+                "description": "The tendency of cells to relax",
+                "type":"slider",
+                "min": 1,
+                "max": 100,
+                "default": 60
             },
             {
                 "name":"Scribble Size",
@@ -108,16 +230,7 @@
                 "type":"slider",
                 "min":1,
                 "max":100,
-                "default":50
-            },
-            {
-                "name":"Vertical Offset",
-                "id":"vertical_offset",
-                "description":"The vertical offset of the drawing",
-                "type":"slider",
-                "min":0,
-                "max":150,
-                "default":20
+                "default":60
             }
         ]
     },
