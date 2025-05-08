@@ -11,6 +11,13 @@ use bbcore::drawing::islands::IslandsParameters;
 use bbcore::drawing::bubbles::BubblesParameters;
 use bbcore::drawing::waves::WavesParameters;
 
+/// 
+/// Used to serialize / deserialize a save file, including the drawing method ID.
+///
+/// # Fields:
+/// - `drawing_id`: The drawing method ID
+/// - `drawing_parameters`: The drawing parameters
+///
 #[derive(Serialize, Deserialize)]
 #[serde(bound = "T: Serialize + for<'de2> Deserialize<'de2>")]
 struct FsDrawing<T : DrawParameters> {
@@ -18,17 +25,34 @@ struct FsDrawing<T : DrawParameters> {
     drawing_parameters: T 
 }
 
+/// 
+/// Used to deserialize just the drawing method ID
+///
+/// # Fields:
+/// - `drawing_id`: The drawing method ID
+///
 #[derive(Deserialize)]
 struct PreDrawingId {
     drawing_id: String,
 }
 
+/// 
+/// A Tauri command to save a drawing method and parameters to a file.
+/// It serializes a `FsDrawing` into a string which is saved to a file.
+///
+/// # Parameters:
+/// - `path`: The path to save the file to
+/// - `drawing_id`: The drawing method ID
+/// - `json_params`: The serialized drawing parameters
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error, as a string, explaining why the function did not succeed
+///
 #[tauri::command(async)]
 pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Result<(), String> {
 
-    println!("OBIOUVLSY HERE!");
     let file_handle = File::create(path).unwrap();
-    println!("GOT HERE!");
 
     match match drawing_id {
             "cascade" => {
@@ -65,11 +89,21 @@ pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Resul
         Err(err) => { return Err(err.to_string().to_owned()); }
     }
 
-    println!("image has been saved");
-        
     Ok(())
 }
 
+/// 
+/// A Tauri command to load a drawing method into a string.
+/// It first deserializes just the drawing_id, to determine which object
+/// to deserialize into.
+///
+/// # Parameters:
+/// - `path`: The path to save the file to
+///
+/// # Returns:
+/// - (drawing_id, drawing_parameters) both as strings
+/// - An error, as a string, explaining why the function did not succeed
+///
 #[tauri::command(async)]
 pub async fn open_file(path: &str) -> Result<(String, String), String> {
 

@@ -17,6 +17,19 @@ use std::sync::Arc;
 pub mod file;
 pub mod client;
 
+
+/// 
+/// A Tauri command used to generate a preview of a drawing, save the instructions,
+/// and returns the path to the preview image.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `style_id`: The drawing method ID
+/// - `json_params`: The drawing method parameters, as JSON
+///
+/// # Returns:
+/// - A path pointing to the preview image
+///
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
@@ -115,7 +128,9 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
 
 
 
-
+/// 
+/// Entry point function for the Tauri app
+///
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state = client::AppState { writer: Arc::new(Mutex::new(None)), reader: Arc::new(Mutex::new(None)), paused_flag: Arc::new(Mutex::new(false)), buf_idx: Arc::new(Mutex::new(0)) };

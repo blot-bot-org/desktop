@@ -10,8 +10,21 @@ use bbcore::client::state::ClientState;
 use bbcore::instruction::InstructionSet;
 use bbcore::hardware::PhysicalDimensions;
 
+
+/// 
+/// Loads the cached instructions and sends them to the firmware for execution.
+/// It emits updates to the window through the `firm-prog` channel.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `state`: A Tauri-injected global state object
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
 #[tauri::command(async)]
-pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String> {
+pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String> {
 
     let win = app.get_webview_window("main").unwrap();
 
@@ -67,13 +80,26 @@ pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>)
     drop(reader_lock);
     drop(buf_idx_lock);
 
+    #[cfg(debug_assertions)]
     println!("Cleanly exited drawing.");
 
-    Ok("".to_owned())
+    Ok(())
 }
 
+/// 
+/// Sends a pause command to the firmware.
+/// It emits updates to the window through the `firm-prog` channel.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `state`: A Tauri-injected global state object
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
 #[tauri::command(async)]
-pub async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+pub async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String>  {
 
     let mut writer_lock = state.writer.lock().await;
     let writer = writer_lock.as_mut().unwrap();
@@ -87,11 +113,21 @@ pub async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -
     
     // drops occur out of scope
 
-    Ok("".to_owned())
+    Ok(())
 }
 
+/// 
+/// Moves the pen to the starting position of the drawing.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
 #[tauri::command(async)]
-pub async fn move_pen_to_start(app: tauri::AppHandle, _: State<'_, AppState>) -> Result<String, String>  {
+pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
 
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let start_file_path = cache_dir.join("start.bin");
@@ -104,11 +140,23 @@ pub async fn move_pen_to_start(app: tauri::AppHandle, _: State<'_, AppState>) ->
         return Err(str.to_string().to_owned());
     }
 
-    Ok("".to_owned())
+    Ok(())
 }
 
+/// 
+/// Sends a stop command to the firmware.
+/// It emits updates to the window through the `firm-prog` channel.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `state`: A Tauri-injected global state object
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
 #[tauri::command(async)]
-pub async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String>  {
+pub async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String>  {
     
     let win = app.get_webview_window("main").unwrap();
 
@@ -119,10 +167,19 @@ pub async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> 
 
     // will finish ClientState::listen in other thread
 
-    Ok("".to_owned())
+    Ok(())
 
 }
 
+/// 
+/// A thread-safe global state containing values of the drawing state.
+///
+/// # Fields:
+/// - `writer`: Mutex-guarded write half of a TcpStream
+/// - `reader`: Mutex-guarded read half of a TcpStream
+/// - `paused_flag`: Mutex-guarded flag to represent whether the machine is paused or not
+/// - `buf_idx`: Mutex-guarded usize representing the current buffer bound index
+///
 pub struct AppState {
     pub writer: Arc<Mutex<Option<OwnedWriteHalf>>>,
     pub reader: Arc<Mutex<Option<OwnedReadHalf>>>,
