@@ -130,6 +130,8 @@ pub fn run() {
             client::pause_firmware,
             client::move_pen_to_start,
             client::stop_drawing,
+            file::save_file,
+            file::open_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -7,6 +7,8 @@
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
     import { listen } from '@tauri-apps/api/event';
 
+    import { save, open } from "@tauri-apps/plugin-dialog";
+
     import toast, { Toaster } from 'svelte-french-toast';
 
     const props: {
@@ -62,12 +64,46 @@
         }
     }
 
+    async function saveFile() {
+        let path = await save({
+            filter: [
+                {
+                    name: "Blot Bot Draw",
+                    extensions: ["bbd"]
+                }
+            ],
+        });
+
+        await invoke("save_file", { path: path, drawingId: styleId, jsonParams: JSON.stringify(parameterObject) });
+        alert("file saved.");
+    }
+
+    async function openFile() {
+        let path = await open({
+            multiple: false,
+            directory: false,
+        });
+
+        await invoke("open_file", { path: path })
+            .then((val) => {
+                styleId = val[0];
+                parameterObject = JSON.parse(val[1]);
+
+                props.onStateChange(styleId, parameterObject);
+            })
+            .catch((err) => {
+                alert(err);
+            });
+    }
+
     switchStyle(initialStyleId);
 </script>
 
 
 <div id="dashboard">
     
+    <div>
+
     <div class="style-container">
         <select bind:value={styleId} onchange={() => switchStyle(styleId)} >
             {#each drawStyles as dsid}
@@ -93,7 +129,19 @@
             <Divider />
         {/each}
     </div>
-    <button style="" onclick={print}>Print</button>
+
+    </div>
+    
+    <div>
+        
+        <div id="file-button-container">
+            <button style="margin-right: 5px !important;" onclick={saveFile}>Save Drawing</button>
+            <button style="margin-left: 5px !important;" onclick={openFile}>Open Drawing</button>
+        </div>
+
+        <button onclick={print}>Print</button>
+
+    </div>
 
     <Toaster />
 </div>
@@ -106,6 +154,12 @@
 
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
+    }
+
+    #file-button-container {
+        width: 100%;
+        display: flex;
     }
 
     .parameter-container, .style-container {
@@ -123,9 +177,11 @@
         height: 50px;
         text-align: center;
         border: none;
-        background-color: #63c7e6;
+        background-color: #4681F4;
+        border: 1px solid #2374F0;
+        box-shadow: 0px 5px 12px -1px #00000030;
         color: white;
-        margin: 10px;
+        margin: 0px 10px 10px 10px;
         border-radius: 5px;
         font-size: 1em;
         outline: none;
@@ -137,7 +193,7 @@
 
     button:hover {
         cursor: pointer;
-        background-color: #53b7d6;
+        background-color: #2374F0;
     }
 
     /*
