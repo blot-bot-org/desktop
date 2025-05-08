@@ -3,7 +3,9 @@
     import Slider from "$components/parameters/Slider.svelte";
     import Number from "$components/parameters/Number.svelte";
     import Text from "$components/parameters/Text.svelte";
+    import FileSelector from "$components/parameters/FileSelector.svelte";
     import Divider from "$components/parameters/Divider.svelte";
+
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
     import { listen } from '@tauri-apps/api/event';
 
@@ -125,6 +127,8 @@
                 <Number min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {:else if param.type == "text"}
                 <Text maxlength={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+            {:else if param.type == "file_selector"}
+                <FileSelector name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {/if}
             <Divider />
         {/each}

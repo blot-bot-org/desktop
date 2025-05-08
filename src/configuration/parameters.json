@@ -75,6 +75,13 @@
         "name":"Waves",
         "parameters": [
             {
+                "name":"Input Image",
+                "id":"image_path",
+                "description":"The input image of the drawing",
+                "type":"file_selector",
+                "default":""
+            },
+            {
                 "name":"Number of Waves",
                 "id":"num_waves",
                 "description": "The number of sine waves to layer",
@@ -125,6 +132,13 @@
     "bubbles": {
         "name":"Bubbles",
         "parameters": [
+            {
+                "name":"Input Image",
+                "id":"image_path",
+                "description":"The input image of the drawing",
+                "type":"file_selector",
+                "default":""
+            },
             {
                 "name":"Width",
                 "id":"width",
@@ -202,6 +216,13 @@
     "scribble": {
         "name":"Scribbles",
         "parameters": [
+            {
+                "name":"Input Image",
+                "id":"image_path",
+                "description":"The input image of the drawing",
+                "type":"file_selector",
+                "default":""
+            },
             {
                 "name":"Width",
                 "id":"width",
