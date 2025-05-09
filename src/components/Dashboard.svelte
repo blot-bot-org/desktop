@@ -76,6 +76,11 @@
             ],
         });
 
+        if(path == null) {
+            // user cancelled the dialog menu
+            return;
+        }
+
         await invoke("save_file", { path: path, drawingId: styleId, jsonParams: JSON.stringify(parameterObject) });
         alert("file saved.");
     }
@@ -85,6 +90,11 @@
             multiple: false,
             directory: false,
         });
+
+        if(path == null) {
+            // user cancelled the dialog menu
+            return;
+        }
 
         await invoke("open_file", { path: path })
             .then((val) => {

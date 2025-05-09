@@ -86,7 +86,7 @@ pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Resul
             _ => { return Err("No such drawing ID".to_owned()); }
     } {
         Ok(()) => {},
-        Err(err) => { return Err(err.to_string().to_owned()); }
+        Err(err) => { return Err(format!("Error saving file: {}", err).to_owned()); }
     }
 
     Ok(())
@@ -110,7 +110,7 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
     let mut file_handle = File::open(path).unwrap();
     let drawing_id: PreDrawingId = match serde_json::from_reader(BufReader::new(&file_handle)) {
         Ok(val) => val,
-        Err(err) => { return Err(err.to_string()) }
+        Err(err) => { return Err(format!("Corrupt save file: {}", err).to_owned()); }
     };
 
     file_handle.seek(SeekFrom::Start(0)).unwrap();

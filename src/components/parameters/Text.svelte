@@ -22,15 +22,20 @@
 <style>
     .text-container {
         display: flex;
-        flex-direction: column;
-        margin-left: 30px;
-        margin-right: 30px;
-
-        margin-bottom: 12px;
+        align-items: center;
+        justify-content: space-between;
+        
+        margin: 8px 30px 4px 30px;
     }
 
     .text-style {
-        max-width: 300px;
-        width: 70%;
+        margin-left: 40px;
+        margin-right: 10px;
+        flex-grow: 1;
+
+        border: none;
+        border-bottom: 1px solid #4681F4;
+        box-shadow: 0px 5px 12px -3px #00000030;
+
     }
 </style>
