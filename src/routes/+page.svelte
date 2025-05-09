@@ -5,6 +5,10 @@
     import ClientWindow from "$components/ClientWindow.svelte";
     import Slider from "$components/parameters/Slider.svelte";
 
+	import { fade } from "svelte/transition";
+    import { quadInOut } from "svelte/easing";
+
+
     let previewRef;
     let dashboardRef;
 
@@ -30,7 +34,9 @@
         {/if}
         
         {#if showingModal && previewRef}
-            <ClientWindow previewRef={previewRef} dashboardRef={dashboardRef} close={() => { showingModal = false; }} />
+            <div transition:fade={{ duration: 150, easing: quadInOut }}>
+                <ClientWindow previewRef={previewRef} dashboardRef={dashboardRef} close={() => { showingModal = false; }} />
+            </div>
         {/if}
     </div>
 </main>

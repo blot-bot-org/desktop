@@ -117,7 +117,8 @@
     <div>
 
     <div class="style-container">
-        <select bind:value={styleId} onchange={() => switchStyle(styleId)} >
+        Draw style:
+        <select id="style-selector" bind:value={styleId} onchange={() => switchStyle(styleId)} >
             {#each drawStyles as dsid}
                 <option value={dsid}>
                     {Parameters[dsid]["name"]}
@@ -127,7 +128,6 @@
 
     </div>
 
-    <Divider />
 
     <div class="parameter-container">
         {#each Parameters[styleId]["parameters"] as param}
@@ -153,7 +153,7 @@
             <button style="margin-left: 5px !important;" onclick={openFile}>Open Drawing</button>
         </div>
 
-        <button id="print-button" onclick={print} bind:this={button}>Print</button>
+        <button id="print-button" onclick={print}>Print</button>
 
     </div>
 
@@ -176,8 +176,22 @@
         display: flex;
     }
 
-    .parameter-container, .style-container {
+    .parameter-container {
         margin: 20px;
+    }
+
+    .style-container {
+        display: flex;
+        align-items: center;
+
+        margin: 30px 48px 30px 48px;
+        gap: 15px;
+    }
+
+    #style-selector {
+        border-radius: 5px;
+        box-shadow: 0px 5px 12px -1px #00000030;
+        outline: none;
     }
 
 
@@ -189,15 +203,16 @@
     button {
         width: calc(100% - 20px);
         height: 50px;
-        text-align: center;
-        border: none;
-        background-color: #4681F4;
-        border: 1px solid #2374F0;
-        box-shadow: 0px 5px 12px -1px #00000030;
-        color: white;
         margin: 0px 10px 10px 10px;
-        border-radius: 5px;
+
+        text-align: center;
+        color: white;
         font-size: 1em;
+
+        border: 1px solid #2374F0;
+        border-radius: 5px;
+        background-color: #4681F4;
+        box-shadow: 0px 5px 12px -1px #00000030;
         outline: none;
 
         transition: 0.2s;

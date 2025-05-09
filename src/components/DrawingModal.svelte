@@ -1,11 +1,20 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
+    import { Steps } from "svelte-steps";
+
+    const steps = [
+        { text: "" },
+        { text: "" },
+        { text: "" },
+        { text: "" },
+    ];
 
     const props: {
         onDraw(): void,
         onError(): void
     } = $props();
 
+    let stepValue = $state(0);
     let progress: number = $state(0);
     let buttonText = $state("Done");
     let buttonShowing = $state(true);
@@ -48,17 +57,20 @@
         if(progress == 0) {
             ModalLayout.applyLayout(new ModalLayout(false, "", "The pen is moving towards the starting position. Please wait..."));
             progress = 1;
+            stepValue = 1;
 
             await invoke("move_pen_to_start")
                 .then(() => {
-                    ModalLayout.applyLayout(new ModalLayout(true, "Start", "Drawing is ready. Press 'Start' to begin a 5 second countdown."));
+                    ModalLayout.applyLayout(new ModalLayout(true, "Start", "Drawing is ready to begin. Press 'Start' to begin a 5 second countdown."));
                     progress = 2;
+                    stepValue = 2;
                 })
                 .catch((err) => {
                     ModalLayout.applyLayout(new ModalLayout(true, "Close", err));
                     progress = -1;
                 });
         } else if(progress == 2) {
+            stepValue = 3;
             ModalLayout.applyLayout(new ModalLayout(false, "", "Drawing is starting..."));
 
             await new Promise(r => setTimeout(r, 5000));
@@ -72,7 +84,15 @@
 <div id="modal-container">
 
     <div id="progress-container">
-
+        <Steps
+            {steps}
+            bind:current={stepValue}
+            line="0.12em"
+            primary="var(--bs-primary, #4681F4)"
+            secondary="var(--bs-secondary, #dddddd)"
+            clickable={false}
+            size="1.5em"
+        />
     </div>
 
     
@@ -91,6 +111,14 @@
 
 
 <style>
+    :global(.steps__number) {
+        color: transparent;
+        user-select: none;
+    }
+
+    :global(.steps-container) {
+    }
+
     #modal-container {
         width: 100% !important;
         height: 100% !important;
@@ -100,10 +128,13 @@
     }
 
     #progress-container {
+        display: flex;
+
         width: 100%;
         height: 50px;
 
-        background-color: #f0f0f0;
+        align-items: center;
+        justify-content: center;
     }
 
     #modal-content {

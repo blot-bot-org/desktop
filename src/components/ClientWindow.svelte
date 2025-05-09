@@ -225,9 +225,7 @@
     }, 5000);
 </script>
 
-{#if isDrawing || isIntro}
-    <div id="fixed-background" />
-{/if}
+<div id="fixed-background" />
 
 {#if isDrawing || isIntro}
 <div id="client-window">
@@ -342,6 +340,10 @@
 <style>
     :global(#fixed-background) {
         position: fixed;
+
+        top: 0;
+        left: 0;
+
         width: 100% !important;
         height: 100% !important;
 
