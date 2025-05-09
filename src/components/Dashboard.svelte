@@ -8,10 +8,10 @@
 
     import { invoke, convertFileSrc } from "@tauri-apps/api/core";
     import { listen } from '@tauri-apps/api/event';
-
     import { save, open } from "@tauri-apps/plugin-dialog";
 
-    import toast, { Toaster } from 'svelte-french-toast';
+    import { onMount } from "svelte";
+    import toast, { Toaster } from "svelte-french-toast";
 
     const props: {
         printPressed(): void;
@@ -122,13 +122,13 @@
     <div class="parameter-container">
         {#each Parameters[styleId]["parameters"] as param}
             {#if param.type == "slider"}
-                <Slider min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+                <Slider min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {:else if param.type == "number"}
-                <Number min={param.min} max={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+                <Number min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {:else if param.type == "text"}
-                <Text maxlength={param.max} name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+                <Text maxlength={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {:else if param.type == "file_selector"}
-                <FileSelector name={param.name} id={param.id} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+                <FileSelector name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
             {/if}
             <Divider />
         {/each}
@@ -143,7 +143,7 @@
             <button style="margin-left: 5px !important;" onclick={openFile}>Open Drawing</button>
         </div>
 
-        <button onclick={print}>Print</button>
+        <button id="print-button" onclick={print} bind:this={button}>Print</button>
 
     </div>
 

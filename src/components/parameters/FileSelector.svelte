@@ -1,12 +1,17 @@
 <script lang="ts">
+    import Tooltip from "$components/parameters/Tooltip.svelte"; 
+
     import { save, open } from "@tauri-apps/plugin-dialog";
 
     export let name;
     export let id;
+    export let description;
 
     export let onChangeCallback;
 
     export let value;
+
+    let labelElement;
 
     async function openFile() {
         let path = await open({
@@ -23,7 +28,8 @@
 </script>
 
 <div class="param-container number-container">
-    <label for={id}>{name}</label>
+    <label for={id} bind:this={labelElement}>{name}</label>
+    <Tooltip element={labelElement} text={description} />
     <button onclick={openFile}>Select File</button>
 </div>
 
