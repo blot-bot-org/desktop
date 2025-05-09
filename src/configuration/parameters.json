@@ -1,73 +1,376 @@
 {
-    "lines": {
-        "name":"Lines",
+    "islands": {
+        "name":"Islands",
         "parameters": [
             {
-                "name":"Line Count",
-                "id": "num_lines",
-                "description": "The number of lines in the image",
-                "type": "slider",
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
                 "min": 1,
-                "max": 29,
-                "default":10
+                "max": 4294967294,
+                "default": 1000
             },
             {
-                "name":"Horizontal Margin",
-                "id": "horizontal_margin",
-                "description": "The horizontal margin of the line, in millimetres",
-                "type": "number",
-                "min": 3,
-                "max": 60,
-                "default":20
+                "name":"Layer Count",
+                "id":"layers",
+                "description": "The number of layers",
+                "type":"number",
+                "min": 20,
+                "max": 300,
+                "default": 100
             },
             {
-                "name":"Test string",
-                "id": "test_string",
-                "description": "a",
-                "type": "text",
-                "maxlength": 20,
-                "default":"hello"
+                "name":"Wave Detail",
+                "id":"sample_per_mm",
+                "description": "The number of samples per drawing millimetre",
+                "type":"number",
+                "min": 1,
+                "max": 10,
+                "default": 4
+            },
+            {
+                "name":"Width",
+                "id":"width",
+                "description": "The width of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 210,
+                "default": 180
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description": "The height of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 297,
+                "default": 260
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description": "A vertical offset for the entire drawing",
+                "type":"number",
+                "min": -1000,
+                "max": 1000,
+                "default": 0
+            },
+            {
+                "name":"Ocean Height",
+                "id":"ocean_height",
+                "description": "The height of the ocean around the islands",
+                "type":"slider",
+                "min": 0,
+                "max": 255,
+                "default": 180
+            },
+            {
+                "name":"Base Size",
+                "id":"base_size",
+                "description": "The size of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 80
+            },
+            {
+                "name":"Mid Size",
+                "id":"mid_size",
+                "description": "The size of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 30
+            },
+            {
+                "name":"High Size",
+                "id":"high_size",
+                "description": "The size of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 2
+            },
+            {
+                "name":"Base Amplitude",
+                "id":"base_amplitude",
+                "description": "The amplitude of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 180
+            },
+            {
+                "name":"Mid Amplitude",
+                "id":"mid_amplitude",
+                "description": "The amplitude of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 50
+            },
+            {
+                "name":"High Amplitude",
+                "id":"high_amplitude",
+                "description": "The amplitude of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 15
             }
         ]
     },
-    "cascade": {
-        "name":"Cascade",
+     "dunes": {
+        "name":"Dunes",
         "parameters": [
             {
-                "name":"Horizontal Boxes",
-                "id":"boxes_horizontal",
-                "description": "The number of triangle boxes, horizontal",
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
+                "min": 1,
+                "max": 4294967294,
+                "default": 1000
+            },
+            {
+                "name":"Layer Count",
+                "id":"layers",
+                "description": "The number of layers",
+                "type":"number",
+                "min": 20,
+                "max": 300,
+                "default": 100
+            },
+            {
+                "name":"Wave Detail",
+                "id":"sample_per_mm",
+                "description": "The number of samples per drawing millimetre",
+                "type":"number",
+                "min": 1,
+                "max": 10,
+                "default": 4
+            },
+            {
+                "name":"Width",
+                "id":"width",
+                "description": "The width of the pattern",
                 "type":"slider",
-                "min": 5,
+                "min": 10,
+                "max": 210,
+                "default": 180
+            },
+            {
+                "name":"Height",
+                "id":"height",
+                "description": "The height of the pattern",
+                "type":"slider",
+                "min": 10,
+                "max": 297,
+                "default": 260
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description": "A vertical offset for the entire drawing",
+                "type":"number",
+                "min": -1000,
+                "max": 1000,
+                "default": 0
+            },
+            {
+                "name":"Base Size",
+                "id":"base_size",
+                "description": "The size of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 80
+            },
+            {
+                "name":"Mid Size",
+                "id":"mid_size",
+                "description": "The size of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 30
+            },
+            {
+                "name":"High Size",
+                "id":"high_size",
+                "description": "The size of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 2
+            },
+            {
+                "name":"Base Amplitude",
+                "id":"base_amplitude",
+                "description": "The amplitude of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 180
+            },
+            {
+                "name":"Mid Amplitude",
+                "id":"mid_amplitude",
+                "description": "The amplitude of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 50
+            },
+            {
+                "name":"High Amplitude",
+                "id":"high_amplitude",
+                "description": "The amplitude of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 15
+            }
+        ]
+    },
+    "entropy": {
+        "name":"Entropy",
+        "parameters": [
+            {
+                "name":"Start Radius",
+                "id":"start_radius",
+                "description": "The starting radius of the spiral",
+                "type": "slider",
+                "min": 0,
                 "max": 100,
+                "default": 0
+            },
+            {
+                "name":"Cycle Distance",
+                "id":"cycle_distance",
+                "description": "The distance between the spiraled lines",
+                "type": "slider",
+                "min": 1,
+                "max": 200,
+                "default": 40
+            },
+            {
+                "name":"Cycle Density",
+                "id":"cycle_density",
+                "description": "The number of samples per spiral",
+                "type": "slider",
+                "min": 4,
+                "max": 720,
+                "default": 150
+            },
+            {
+                "name":"Total Steps",
+                "id":"total_steps",
+                "description": "The total steps for the entire spiral",
+                "type": "number",
+                "min": 100,
+                "max": 200000,
+                "default": 5000
+            },
+            {
+                "name":"Swirl Factor",
+                "id":"swirl_factor",
+                "description": "The swirl intensity",
+                "type": "slider",
+                "min": 0,
+                "max": 2000,
+                "default": 500
+            },
+            {
+                "name":"Swirl Decay",
+                "id":"swirl_decay",
+                "description": "The swirl decay as it moves outwards",
+                "type": "slider",
+                "min": 1,
+                "max": 250,
+                "default": 80
+            },
+            {
+                "name":"Horizontal Offset",
+                "id":"horizontal_offset",
+                "description":"The horizontal offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Vertical Offset",
+                "id":"vertical_offset",
+                "description":"The vertical offset of the drawing",
+                "type":"slider",
+                "min":-150,
+                "max":150,
+                "default":0
+            },
+            {
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
+                "min": 1,
+                "max": 4294967294,
+                "default": 1000
+            },
+            {
+                "name":"Base Size",
+                "id":"base_size",
+                "description": "The size of the base perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 40
+            },
+            {
+                "name":"Mid Size",
+                "id":"mid_size",
+                "description": "The size of the mid perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
+                "default": 30
+            },
+            {
+                "name":"High Size",
+                "id":"high_size",
+                "description": "The size of the high perlin layer",
+                "type":"slider",
+                "min": 1,
+                "max": 254,
                 "default": 20
             },
             {
-                "name":"Vertical Boxes",
-                "id":"boxes_vertical",
-                "description": "The number of triangle boxes, vertically",
+                "name":"Base Strength",
+                "id":"base_strength",
+                "description": "The amplitude of the base perlin layer",
                 "type":"slider",
-                "min": 5,
-                "max": 100,
-                "default": 20
+                "min": 0,
+                "max": 254,
+                "default": 0
             },
             {
-                "name":"Horizontal Margin",
-                "id":"horizontal_margin",
-                "description": "The horizontal margin of the pattern, in millimetres",
-                "type": "slider",
-                "min": 0.0,
-                "max": 100.0,
-                "default": 10.0
+                "name":"Mid Strength",
+                "id":"mid_strength",
+                "description": "The amplitude of the mid perlin layer",
+                "type":"slider",
+                "min": 0,
+                "max": 255,
+                "default": 0
             },
             {
-                "name":"Vertical Margin",
-                "id":"vertical_margin",
-                "description": "The vertical margin of the pattern, in millimeters",
-                "type": "slider",
-                "min": 0.0,
-                "max": 100.0,
-                "default": 10.0
+                "name":"High Strength",
+                "id":"high_strength",
+                "description": "The amplitude of the high perlin layer",
+                "type":"slider",
+                "min": 0,
+                "max": 255,
+                "default": 0
             }
         ]
     },
@@ -127,6 +430,47 @@
                 "default": 10.0
             }
 
+        ]
+    },
+    "cascade": {
+        "name":"Cascade",
+        "parameters": [
+            {
+                "name":"Horizontal Boxes",
+                "id":"boxes_horizontal",
+                "description": "The number of triangle boxes, horizontal",
+                "type":"slider",
+                "min": 5,
+                "max": 100,
+                "default": 20
+            },
+            {
+                "name":"Vertical Boxes",
+                "id":"boxes_vertical",
+                "description": "The number of triangle boxes, vertically",
+                "type":"slider",
+                "min": 5,
+                "max": 100,
+                "default": 20
+            },
+            {
+                "name":"Horizontal Margin",
+                "id":"horizontal_margin",
+                "description": "The horizontal margin of the pattern, in millimetres",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            },
+            {
+                "name":"Vertical Margin",
+                "id":"vertical_margin",
+                "description": "The vertical margin of the pattern, in millimeters",
+                "type": "slider",
+                "min": 0.0,
+                "max": 100.0,
+                "default": 10.0
+            }
         ]
     },
     "bubbles": {
@@ -306,238 +650,34 @@
             }
         ]
     },
-    "dunes": {
-        "name":"Dunes",
+    "lines": {
+        "name":"Lines",
         "parameters": [
             {
-                "name":"Random Seed",
-                "id":"seed",
-                "description": "A seed for the RNG",
-                "type":"number",
+                "name":"Line Count",
+                "id": "num_lines",
+                "description": "The number of lines in the image",
+                "type": "slider",
                 "min": 1,
-                "max": 4294967294,
-                "default": 1000
+                "max": 29,
+                "default":10
             },
             {
-                "name":"Layer Count",
-                "id":"layers",
-                "description": "The number of layers",
-                "type":"number",
-                "min": 20,
-                "max": 300,
-                "default": 100
+                "name":"Horizontal Margin",
+                "id": "horizontal_margin",
+                "description": "The horizontal margin of the line, in millimetres",
+                "type": "number",
+                "min": 3,
+                "max": 60,
+                "default":20
             },
             {
-                "name":"Wave Detail",
-                "id":"sample_per_mm",
-                "description": "The number of samples per drawing millimetre",
-                "type":"number",
-                "min": 1,
-                "max": 10,
-                "default": 4
-            },
-            {
-                "name":"Width",
-                "id":"width",
-                "description": "The width of the pattern",
-                "type":"slider",
-                "min": 10,
-                "max": 210,
-                "default": 180
-            },
-            {
-                "name":"Height",
-                "id":"height",
-                "description": "The height of the pattern",
-                "type":"slider",
-                "min": 10,
-                "max": 297,
-                "default": 260
-            },
-            {
-                "name":"Vertical Offset",
-                "id":"vertical_offset",
-                "description": "A vertical offset for the entire drawing",
-                "type":"number",
-                "min": -1000,
-                "max": 1000,
-                "default": 0
-            },
-            {
-                "name":"Base Size",
-                "id":"base_size",
-                "description": "The size of the base perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 80
-            },
-            {
-                "name":"Mid Size",
-                "id":"mid_size",
-                "description": "The size of the mid perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 30
-            },
-            {
-                "name":"High Size",
-                "id":"high_size",
-                "description": "The size of the high perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 2
-            },
-            {
-                "name":"Base Amplitude",
-                "id":"base_amplitude",
-                "description": "The amplitude of the base perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 180
-            },
-            {
-                "name":"Mid Amplitude",
-                "id":"mid_amplitude",
-                "description": "The amplitude of the mid perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 50
-            },
-            {
-                "name":"High Amplitude",
-                "id":"high_amplitude",
-                "description": "The amplitude of the high perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 15
-            }
-        ]
-    },
-    "islands": {
-        "name":"Islands",
-        "parameters": [
-            {
-                "name":"Random Seed",
-                "id":"seed",
-                "description": "A seed for the RNG",
-                "type":"number",
-                "min": 1,
-                "max": 4294967294,
-                "default": 1000
-            },
-            {
-                "name":"Layer Count",
-                "id":"layers",
-                "description": "The number of layers",
-                "type":"number",
-                "min": 20,
-                "max": 300,
-                "default": 100
-            },
-            {
-                "name":"Wave Detail",
-                "id":"sample_per_mm",
-                "description": "The number of samples per drawing millimetre",
-                "type":"number",
-                "min": 1,
-                "max": 10,
-                "default": 4
-            },
-            {
-                "name":"Width",
-                "id":"width",
-                "description": "The width of the pattern",
-                "type":"slider",
-                "min": 10,
-                "max": 210,
-                "default": 180
-            },
-            {
-                "name":"Height",
-                "id":"height",
-                "description": "The height of the pattern",
-                "type":"slider",
-                "min": 10,
-                "max": 297,
-                "default": 260
-            },
-            {
-                "name":"Vertical Offset",
-                "id":"vertical_offset",
-                "description": "A vertical offset for the entire drawing",
-                "type":"number",
-                "min": -1000,
-                "max": 1000,
-                "default": 0
-            },
-            {
-                "name":"Ocean Height",
-                "id":"ocean_height",
-                "description": "The height of the ocean around the islands",
-                "type":"slider",
-                "min": 0,
-                "max": 255,
-                "default": 180
-            },
-            {
-                "name":"Base Size",
-                "id":"base_size",
-                "description": "The size of the base perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 80
-            },
-            {
-                "name":"Mid Size",
-                "id":"mid_size",
-                "description": "The size of the mid perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 30
-            },
-            {
-                "name":"High Size",
-                "id":"high_size",
-                "description": "The size of the high perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 2
-            },
-            {
-                "name":"Base Amplitude",
-                "id":"base_amplitude",
-                "description": "The amplitude of the base perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 180
-            },
-            {
-                "name":"Mid Amplitude",
-                "id":"mid_amplitude",
-                "description": "The amplitude of the mid perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 50
-            },
-            {
-                "name":"High Amplitude",
-                "id":"high_amplitude",
-                "description": "The amplitude of the high perlin layer",
-                "type":"slider",
-                "min": 1,
-                "max": 254,
-                "default": 15
+                "name":"Test string",
+                "id": "test_string",
+                "description": "a",
+                "type": "text",
+                "maxlength": 20,
+                "default":"hello"
             }
         ]
     }

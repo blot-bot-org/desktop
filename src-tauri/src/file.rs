@@ -10,6 +10,7 @@ use bbcore::drawing::dunes::DunesParameters;
 use bbcore::drawing::islands::IslandsParameters;
 use bbcore::drawing::bubbles::BubblesParameters;
 use bbcore::drawing::waves::WavesParameters;
+use bbcore::drawing::entropy::EntropyParameters;
 
 /// 
 /// Used to serialize / deserialize a save file, including the drawing method ID.
@@ -83,6 +84,10 @@ pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Resul
                 let params = serde_json::from_str::<WavesParameters>(json_params).unwrap();
                 serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
             },
+            "entropy" => {
+                let params = serde_json::from_str::<EntropyParameters>(json_params).unwrap();
+                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+            },
             _ => { return Err("No such drawing ID".to_owned()); }
     } {
         Ok(()) => {},
@@ -154,6 +159,12 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
             },
             "waves" => {
                 match serde_json::from_reader::<_, FsDrawing<WavesParameters>>(buf_read) {
+                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
+                    Err(err) => Err(err.to_string())
+                }
+            },
+            "entropy" => {
+                match serde_json::from_reader::<_, FsDrawing<EntropyParameters>>(buf_read) {
                     Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
                     Err(err) => Err(err.to_string())
                 }
