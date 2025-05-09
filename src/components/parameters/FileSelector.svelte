@@ -51,8 +51,7 @@
     }
 
     .button-style {
-        max-width: 300px;
-        width: 30%;
+        width: 100px;
 
         padding: 5px 8px 5px 8px;
 
