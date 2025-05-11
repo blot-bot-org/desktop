@@ -13,10 +13,13 @@
     import { onMount } from "svelte";
     import toast, { Toaster } from "svelte-french-toast";
 
+    import Icon from "@iconify/svelte";
+
     const props: {
         printPressed(): void;
         pausePressed(): void;
         onStateChange(styleId: string, parameterObject: any): void;
+        onMachineConfigOpen(): void;
     } = $props(); 
 
     const drawStyles = Object.keys(Parameters);
@@ -148,12 +151,16 @@
     
     <div>
         
-        <div id="file-button-container">
+        <div class="button-container">
             <button style="margin-right: 5px !important;" onclick={saveFile}>Save Drawing</button>
             <button style="margin-left: 5px !important;" onclick={openFile}>Open Drawing</button>
         </div>
+        
 
-        <button id="print-button" onclick={print}>Print</button>
+        <div class="button-container">
+            <button style="margin-right: 5px !important;" id="print-button" onclick={print}>Print</button>
+            <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onMachineConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
+        </div>
 
     </div>
 
@@ -171,13 +178,19 @@
         justify-content: space-between;
     }
 
-    #file-button-container {
+    .button-container {
         width: 100%;
         display: flex;
     }
 
+    #print-config-button {
+        width: 60px;
+    }
+
     .parameter-container {
         margin: 20px;
+
+        overflow: auto;
     }
 
     .style-container {

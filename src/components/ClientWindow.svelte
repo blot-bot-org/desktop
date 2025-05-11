@@ -220,12 +220,9 @@
         if(_mcProtocol != undefined) { mcProtocol = _mcProtocol };
     }
 
-    setTimeout(() => {
-        // startDrawing();
-    }, 5000);
 </script>
 
-<div id="fixed-background" />
+<div class="fixed-background" />
 
 {#if isDrawing || isIntro}
 <div id="client-window">
@@ -338,18 +335,6 @@
 {/if}
 
 <style>
-    :global(#fixed-background) {
-        position: fixed;
-
-        top: 0;
-        left: 0;
-
-        width: 100% !important;
-        height: 100% !important;
-
-        background-color: #000000c5;
-    }
-
     #client-window {
         position: fixed;
 

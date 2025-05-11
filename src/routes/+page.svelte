@@ -3,7 +3,7 @@
     import Dashboard from "$components/Dashboard.svelte";
     import Preview from "$components/Preview.svelte";
     import ClientWindow from "$components/ClientWindow.svelte";
-    import Slider from "$components/parameters/Slider.svelte";
+    import MachineConfig from "$components/MachineConfig.svelte";
 
 	import { fade } from "svelte/transition";
     import { quadInOut } from "svelte/easing";
@@ -13,6 +13,7 @@
     let dashboardRef;
 
     let showingModal = false;
+    let showingMachineConfig = false;
 
     setTimeout(() => {
         console.log(previewRef);
@@ -30,12 +31,18 @@
         <Preview bind:this={previewRef} />
 
         {#if previewRef} <!-- used to defer loading until preview_ref is initialised -->
-        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} />
+        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onMachineConfigOpen={() => { showingMachineConfig = true; console.log("hi"); }} />
         {/if}
         
         {#if showingModal && previewRef}
             <div transition:fade={{ duration: 150, easing: quadInOut }}>
                 <ClientWindow previewRef={previewRef} dashboardRef={dashboardRef} close={() => { showingModal = false; }} />
+            </div>
+        {/if}
+
+        {#if showingMachineConfig}
+            <div transition:fade={{ duration: 150, easing: quadInOut }}>
+                <MachineConfig onClose={() => { showingMachineConfig = false; }} />
             </div>
         {/if}
     </div>
@@ -65,5 +72,18 @@
 
         display: flex;
         overflow: none;
+    }
+
+    /* used by a few popup windows */
+    :global(.fixed-background) {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 100% !important;
+        height: 100% !important;
+
+        background-color: #000000c5;
     }
 </style>
