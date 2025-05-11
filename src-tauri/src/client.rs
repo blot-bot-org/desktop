@@ -1,10 +1,11 @@
-use std::io::{BufReader, Read};
+use std::io::{BufRead, BufReader, Read};
 use std::ops::DerefMut;
 use tokio::sync::Mutex;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use std::sync::Arc;
 use tauri::{Emitter, Manager, State};
 use std::fs::File;
+use std::io::Write;
 
 use bbcore::client::state::ClientState;
 use bbcore::instruction::InstructionSet;
@@ -30,6 +31,8 @@ pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>)
 
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
+
+    // getting instruction bytes
     let ins_file_path = cache_dir.join("instructions.bin");
     let mut ins_file = File::open(ins_file_path).unwrap();
     let mut buffer = Vec::new();
@@ -40,16 +43,38 @@ pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>)
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
 
+    // getting machine config
+    let ins_file_path = cache_dir.join("machine_conf");
+
+    match ins_file_path.try_exists() {
+        Ok(exists) => if !exists { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
+        Err(_) => { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
+    }
+
+    let ins_file = File::open(ins_file_path).unwrap();
+    let mut contents = String::new();
+
+    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
+    if contents.is_empty() {
+        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
+    }
+
+    let parts: Vec<&str> = contents.split(":").collect();
+
+    if parts.len() != 2 {
+        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
+    }
+
     let mut buf_idx_lock = state.buf_idx.lock().await;
     *buf_idx_lock = 0;
     drop(buf_idx_lock);
 
 
-    win.emit("firm-prog", format!(r#"{{"event":"populate_network", "address":"{}"}}"#, "192.168.0.16:8180")).unwrap();
+    win.emit("firm-prog", format!(r#"{{"event":"populate_network", "address":"{}"}}"#, format!("{}:{}", parts.get(0).unwrap(), parts.get(1).unwrap()))).unwrap();
     win.emit("firm-prog", format!(r#"{{"event":"populate_draw", "totalBytes":"{}"}}"#, ins_set.get_binary().len())).unwrap();
 
     // create new socket, and split it into owned directions
-    let (client, machine_config) = ClientState::new("192.168.0.16", 8180).await.unwrap();
+    let (client, machine_config) = ClientState::new(parts.get(0).unwrap(), parts.get(1).unwrap().parse::<u16>().unwrap()).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
 
     win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#).unwrap();
@@ -130,13 +155,39 @@ pub async fn pause_firmware(app: tauri::AppHandle, state: State<'_, AppState>) -
 pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
 
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    
+    // getting start position
     let start_file_path = cache_dir.join("start.bin");
     let start_file = File::open(start_file_path).unwrap();
     let mut start_contents = String::new();
     BufReader::new(start_file).read_to_string(&mut start_contents).unwrap();
     let start_pos: Vec<f64> = start_contents.split_whitespace().filter_map(|s| s.parse::<f64>().ok()).collect();
+
+    // getting machine config
+    let ins_file_path = cache_dir.join("machine_conf");
+
+    match ins_file_path.try_exists() {
+        Ok(exists) => if !exists { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
+        Err(_) => { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
+    }
+
+    let ins_file = File::open(ins_file_path).unwrap();
+    let mut contents = String::new();
+
+    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
+    if contents.is_empty() {
+        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
+    }
+
+    let parts: Vec<&str> = contents.split(":").collect();
+
+    if parts.len() != 2 {
+        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
+    }
+    
     let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
-    if let Err(str) = bbcore::client::move_to_start("192.168.0.16", 8180, &phys_dim, start_pos[0], start_pos[1]) {
+
+    if let Err(str) = bbcore::client::move_to_start(parts.get(0).unwrap(), parts.get(1).unwrap().parse::<u16>().unwrap(), &phys_dim, start_pos[0], start_pos[1]) {
         return Err(str.to_string().to_owned());
     }
 
@@ -185,4 +236,55 @@ pub struct AppState {
     pub reader: Arc<Mutex<Option<OwnedReadHalf>>>,
     pub paused_flag: Arc<Mutex<bool>>,
     pub buf_idx: Arc<Mutex<usize>>,
+}
+
+
+
+
+#[tauri::command(async)]
+pub async fn save_machine_config(app: tauri::AppHandle, _: State<'_, AppState>, addr: &str, port: usize) -> Result<(), String>  {
+
+    // directory handling
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
+
+    let ins_file_path = cache_dir.join("machine_conf");
+    let mut ins_file = File::create(ins_file_path).unwrap();
+    let _ = ins_file.write_all(format!("{}:{}", addr, port).as_bytes());
+    
+    Ok(())
+
+}
+
+
+#[tauri::command(async)]
+pub async fn get_machine_config(app: tauri::AppHandle, _: State<'_, AppState>) -> Result<String, ()>  {
+
+    // directory handling
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
+
+    let ins_file_path = cache_dir.join("machine_conf");
+
+    match ins_file_path.try_exists() {
+        Ok(exists) => if !exists { return Ok("null".to_owned()); },
+        Err(_) => { return Ok("null".to_owned()); },
+    }
+
+    let ins_file = File::open(ins_file_path).unwrap();
+    let mut contents = String::new();
+
+    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
+    if contents.is_empty() {
+        return Ok("null".to_owned());
+    }
+
+    let parts: Vec<&str> = contents.split(":").collect();
+
+    if parts.len() != 2 {
+        return Ok("null".to_owned());
+    }
+    
+    Ok(format!("{}:{}", parts.get(0).unwrap(), parts.get(1).unwrap()).to_owned())
+
 }

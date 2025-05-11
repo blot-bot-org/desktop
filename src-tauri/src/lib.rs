@@ -154,6 +154,8 @@ pub fn run() {
             client::pause_firmware,
             client::move_pen_to_start,
             client::stop_drawing,
+            client::save_machine_config,
+            client::get_machine_config,
             file::save_file,
             file::open_file,
         ])
