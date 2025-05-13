@@ -117,7 +117,7 @@
 
 <div id="dashboard">
     
-    <div>
+    <div style="flex-grow: 1; margin-bottom: 10px; overflow: auto;">
 
     <div class="style-container">
         Draw style:
@@ -133,6 +133,7 @@
 
 
     <div class="parameter-container">
+        <Divider />
         {#each Parameters[styleId]["parameters"] as param}
             {#if param.type == "slider"}
                 <Slider min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
@@ -176,6 +177,8 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+
+        overflow: hidden;
     }
 
     .button-container {
@@ -190,7 +193,8 @@
     .parameter-container {
         margin: 20px;
 
-        overflow: auto;
+        overflow: scroll;
+        flex-grow: 1;
     }
 
     .style-container {
