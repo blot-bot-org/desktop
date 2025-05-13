@@ -175,3 +175,28 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
         Err(err) => { return Err(format!("Corrupt save file: {}", err).to_owned()); }
     }
 }
+
+
+/// 
+/// A serializable struct for storing the app configuration.
+///
+/// # Fields:
+/// - `machine_addr`: The address of the drawing machine server
+/// - `machine_port`: The address of the drawing machine server
+/// - `phys_motor_interspace`: The horizontal distance between the motors
+/// - `phys_page_left_offset`: The horizontal distance between the left motor shaft and the top left of the page
+/// - `phys_page_top_offset`: The vertical distance between the left motor shaft and the top left of the page
+/// - `phys_page_width`: The width of the page
+/// - `phys_page_height`: The height of the page
+///
+#[derive(Serialize, Deserialize)]
+struct AppConfig {
+    machine_addr: Option<String>,
+    machine_port: Option<u16>,
+
+    phys_motor_interspace: Option<f64>,
+    phys_page_left_offset: Option<f64>,
+    phys_page_top_offset: Option<f64>,
+    phys_page_width: Option<f64>,
+    phys_page_height: Option<f64>,
+}
