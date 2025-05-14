@@ -20,8 +20,8 @@ The Rust frontend implements `bbcore` which is my custom Blot Bot drawing design
 ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
 
 ## Screenshots
-Here are two screenshots from the app which demonstrate some drawing styles from `bbcore`.
-- the "Scribble" drawing method, which draws circles around points from a weighted voronoi diagram. This is based on an input image. (old screenshot)
+Here are four screenshots from the app which demonstrate some drawing styles from `bbcore`.
+- the "Scribble" drawing method, which draws circles around points from a weighted voronoi diagram, based on an input image. (old screenshot)
 - the "Entropy" drawing method, which is a purely mathematical drawing method using layered Perlin noise on a swirl.
 - the "Waves" drawing method, which draws sine waves based on an input image.
 - the "Islands" drawing method, which generates island/mountain like terrain using layered Perlin noise.
