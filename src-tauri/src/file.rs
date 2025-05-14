@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Seek, SeekFrom};
+use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
 
 use serde::{Serialize, Deserialize};
 use bbcore::drawing::DrawParameters;
@@ -177,6 +177,7 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
 }
 
 
+
 /// 
 /// A serializable struct for storing the app configuration.
 ///
@@ -190,13 +191,88 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
 /// - `phys_page_height`: The height of the page
 ///
 #[derive(Serialize, Deserialize)]
-struct AppConfig {
-    machine_addr: Option<String>,
-    machine_port: Option<u16>,
+pub struct AppConfig {
+    pub machine_addr: String,
+    pub machine_port: u16,
 
-    phys_motor_interspace: Option<f64>,
-    phys_page_left_offset: Option<f64>,
-    phys_page_top_offset: Option<f64>,
-    phys_page_width: Option<f64>,
-    phys_page_height: Option<f64>,
+    pub phys_motor_interspace: f64,
+    pub phys_page_left_offset: f64,
+    pub phys_page_top_offset: f64,
+    pub phys_page_width: f64,
+    pub phys_page_height: f64,
+}
+
+#[tauri::command(async)]
+pub fn get_app_config(app: tauri::AppHandle) -> Result<String, ()> {
+
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let app_config_path = cache_dir.join("app_config.json");
+
+    match app_config_path.try_exists() {
+        Ok(exists) => if !exists { return Err(()) },
+        Err(_) => { return Err(()) }
+    };
+
+    let file_handle = match File::open(app_config_path) {
+        Ok(handle) => handle,
+        Err(_) => { return Err(()) }
+    };
+
+    let mut contents = String::new();
+    BufReader::new(file_handle).read_to_string(&mut contents).unwrap();
+
+    match serde_json::from_str::<AppConfig>(contents.as_str()) {
+        Ok(_) => { return Ok(contents) },
+        Err(_) => { return Err(()) }
+    };
+
+}
+
+#[tauri::command(async)]
+pub fn save_app_config(app: tauri::AppHandle, stringified_config: &str) -> Result<(), ()> {
+
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let app_config_path = cache_dir.join("app_config.json");
+
+    
+    let mut file_handle = match File::create(app_config_path) {
+        Ok(handle) => handle,
+        Err(_) => { return Err(()) }
+    };
+
+    // check its in the right format (can be serialized)
+    match serde_json::from_str::<AppConfig>(stringified_config) {
+        Ok(_) => { },
+        Err(_) => { return Err(()) }
+    };
+    
+    match file_handle.write_all(stringified_config.as_bytes()) {
+        Ok(_) => { return Ok(()); },
+        Err(_) => { return Err(()); }
+    };
+}
+
+pub fn get_app_config_struct(app: &tauri::AppHandle) -> Result<AppConfig, ()> {
+    
+    let cache_dir = tauri::Manager::path(app).app_cache_dir().expect("Should get cache dir");
+    let app_config_path = cache_dir.join("app_config.json");
+
+    match app_config_path.try_exists() {
+        Ok(exists) => if !exists { return Err(()) },
+        Err(_) => { return Err(()) }
+    };
+
+    let file_handle = match File::open(app_config_path) {
+        Ok(handle) => handle,
+        Err(_) => { return Err(()) }
+    };
+
+    let mut contents = String::new();
+    BufReader::new(file_handle).read_to_string(&mut contents).unwrap();
+
+    match serde_json::from_str::<AppConfig>(contents.as_str()) {
+        Ok(val) => { return Ok(val) },
+        Err(_) => { return Err(()) }
+    };
+
 }

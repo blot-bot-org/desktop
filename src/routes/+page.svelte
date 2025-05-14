@@ -3,7 +3,7 @@
     import Dashboard from "$components/Dashboard.svelte";
     import Preview from "$components/Preview.svelte";
     import ClientWindow from "$components/ClientWindow.svelte";
-    import MachineConfig from "$components/MachineConfig.svelte";
+    import AppConfig from "$components/AppConfig.svelte";
 
 	import { fade } from "svelte/transition";
     import { quadInOut } from "svelte/easing";
@@ -13,7 +13,7 @@
     let dashboardRef;
 
     let showingModal = false;
-    let showingMachineConfig = false;
+    let showingAppConfig = false;
 
     setTimeout(() => {
         console.log(previewRef);
@@ -31,7 +31,7 @@
         <Preview bind:this={previewRef} />
 
         {#if previewRef} <!-- used to defer loading until preview_ref is initialised -->
-        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onMachineConfigOpen={() => { showingMachineConfig = true; console.log("hi"); }} />
+        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onAppConfigOpen={() => { showingAppConfig = true; console.log("hi"); }} />
         {/if}
         
         {#if showingModal && previewRef}
@@ -40,9 +40,9 @@
             </div>
         {/if}
 
-        {#if showingMachineConfig}
+        {#if showingAppConfig}
             <div transition:fade={{ duration: 150, easing: quadInOut }}>
-                <MachineConfig onClose={() => { showingMachineConfig = false; }} />
+                <AppConfig onClose={() => { showingAppConfig = false; dashboardRef.make_preview(); }} />
             </div>
         {/if}
     </div>

@@ -10,6 +10,7 @@ use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
 use bbcore::instruction::InstructionSet;
+use file::get_app_config_struct;
 use std::fs::File;
 use std::io::Write;
 use tokio::sync::Mutex;
@@ -33,8 +34,13 @@ pub mod client;
 ///
 #[tauri::command(async)]
 fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> String {
-    let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
-    
+    let config = get_app_config_struct(&app);
+
+    let phys_dim = match config {
+        Ok(app_config) => PhysicalDimensions::new(app_config.phys_motor_interspace, app_config.phys_page_left_offset, app_config.phys_page_top_offset, app_config.phys_page_width, app_config.phys_page_height),
+        Err(_) => PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.),
+    };
+
     let ins_bytes: Result<(Vec<u8>, f64, f64), String> = match style_id {
         "cascade" => {
             let params = match serde_json::from_str::<CascadeParameters>(json_params) {
@@ -158,6 +164,8 @@ pub fn run() {
             client::get_machine_config,
             file::save_file,
             file::open_file,
+            file::get_app_config,
+            file::save_app_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

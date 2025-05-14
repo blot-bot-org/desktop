@@ -11,6 +11,8 @@ use bbcore::client::state::ClientState;
 use bbcore::instruction::InstructionSet;
 use bbcore::hardware::PhysicalDimensions;
 
+use crate::file::{get_app_config_struct, AppConfig};
+
 
 /// 
 /// Loads the cached instructions and sends them to the firmware for execution.
@@ -185,7 +187,11 @@ pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
         return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
     }
     
-    let phys_dim = PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.);
+    let app_config = match get_app_config_struct(&app) {
+        Ok(val) => val,
+        Err(_) => { return Err("Print settings have not been configured.".to_owned()); }
+    };
+    let phys_dim = PhysicalDimensions::new(app_config.phys_motor_interspace, app_config.phys_page_left_offset, app_config.phys_page_top_offset, app_config.phys_page_width, app_config.phys_page_height);
 
     if let Err(str) = bbcore::client::move_to_start(parts.get(0).unwrap(), parts.get(1).unwrap().parse::<u16>().unwrap(), &phys_dim, start_pos[0], start_pos[1]) {
         return Err(str.to_string().to_owned());

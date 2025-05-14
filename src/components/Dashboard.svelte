@@ -19,7 +19,7 @@
         printPressed(): void;
         pausePressed(): void;
         onStateChange(styleId: string, parameterObject: any): void;
-        onMachineConfigOpen(): void;
+        onAppConfigOpen(): void;
     } = $props(); 
 
     const drawStyles = Object.keys(Parameters);
@@ -31,7 +31,7 @@
 
     let drawingPaused = false;
     
-    async function make_preview(event: Event) {
+    export async function make_preview(event: Event) {
         if(event) event.preventDefault();
 
         props.onStateChange(styleId, parameterObject);
@@ -160,7 +160,7 @@
 
         <div class="button-container">
             <button style="margin-right: 5px !important;" id="print-button" onclick={print}>Print</button>
-            <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onMachineConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
+            <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onAppConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
         </div>
 
     </div>
@@ -209,6 +209,12 @@
         border-radius: 5px;
         box-shadow: 0px 5px 12px -1px #00000030;
         outline: none;
+
+        border: 1px solid #D0D0D0;
+        min-width: 100px;
+        min-height: 30px;
+
+        border-radius: 4px;
     }
 
 

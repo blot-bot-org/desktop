@@ -22,7 +22,6 @@
         let realImgWidth = imageElement.naturalWidth;
         let realImgHeight = imageElement.naturalHeight;
 
-
         let previewStageElement = document.getElementById("preview-image-container");
 
         let marginRatio = 0.1;
@@ -66,16 +65,12 @@
             return;
         }
 
-        console.log(`Invoking preview ${style_id} function with obj:`);
-        console.log(parameter_object);
-
         let timeoutRef = setTimeout(() => {
             renderLoadingOverlay = true;
         }, 250);
 
         let path = await invoke("gen_preview", { styleId: style_id, jsonParams: JSON.stringify(parameter_object) });
         
-        console.log(path)
         if(path.startsWith("error")) {
             alert(path.split(":")[1]);
             clearTimeout(timeoutRef);
@@ -90,26 +85,11 @@
         imageUrl += `?refresh=${Math.floor(Math.random() * 10000000)}`; // hack to force reload image by adding random parameter to change url
         imageSrc = imageUrl;
         
-        recomputeImageResolution();
+        setTimeout(() => {
+            recomputeImageResolution();
+        }, 50); // kinda bad, but only every visually bugs when page dimensions change... how to wait for image to finish loading?
     }
   
-    export function scaleImage(event: Event) {
-        /*
-        let imageWidth = event.srcElement.naturalWidth;
-        let imageHeight = event.srcElement.naturalHeight;
-  
-        if(imageWidth > imageHeight) {
-            event.srcElement.style.width = "80%";
-            event.srcElement.style.height = "auto";
-        } else {
-            event.srcElement.style.height = "80%";
-            event.srcElement.style.width = "auto";
-        }
-        */
-
-        // error if the window gets too thin but whatever
-    }
-
     export function getImageUrl(): string {
         return imageSrc;
     }
@@ -122,7 +102,7 @@
 <div id="preview-container">
     <div id="preview-image-container">
         <div style="width: {imageWidth}px; height: {imageHeight}px;" >
-            <img id="preview-image" src={imageSrc} on:load={scaleImage} style="width: {imageWidth}px; height: {imageHeight}px;" />
+            <img id="preview-image" src={imageSrc} style="width: {imageWidth}px; height: {imageHeight}px;" />
             {#if renderLoadingOverlay}
                 <div class="preview-overlay" style="width: {imageWidth}px; height: {imageHeight}px;" in:fade={{ duration: 250 }}>
                     <Pulse size="34" color="#EEEEEE" unit="px" duration="1s" />
