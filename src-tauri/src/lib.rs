@@ -6,6 +6,7 @@ use bbcore::drawing::islands::{IslandsMethod, IslandsParameters};
 use bbcore::drawing::bubbles::{BubblesMethod, BubblesParameters};
 use bbcore::drawing::waves::{WavesMethod, WavesParameters};
 use bbcore::drawing::entropy::{EntropyMethod, EntropyParameters};
+use bbcore::drawing::shades::{ShadesMethod, ShadesParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
@@ -104,6 +105,14 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
                 Err(err) => return "error:".to_owned() + err.to_string().as_str(),
             };
             let method = EntropyMethod {};
+            method.gen_instructions(&phys_dim, &params)
+        },
+        "shades" => {
+            let params = match serde_json::from_str::<ShadesParameters>(json_params) {
+                Ok(val) => val,
+                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+            };
+            let method = ShadesMethod {};
             method.gen_instructions(&phys_dim, &params)
         },
         _ => {

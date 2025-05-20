@@ -680,5 +680,46 @@
                 "default":"hello"
             }
         ]
+    },
+    "shades": {
+        "name":"Shades",
+        "parameters": [
+            {
+                "name":"Width",
+                "id": "width",
+                "description": "The width of the shade box",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":100
+            },
+            {
+                "name":"Height",
+                "id": "height",
+                "description": "The height of the shade box",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":100
+            },
+            {
+                "name":"Number of Lines",
+                "id": "num_lines",
+                "description": "The number of lines in the image",
+                "type": "slider",
+                "min": 1,
+                "max": 50,
+                "default":10
+            },
+            {
+                "name":"Tendency",
+                "id": "power",
+                "description": "The tendency of the lines to converge",
+                "type": "slider",
+                "min": 10,
+                "max": 100,
+                "default":20
+            }
+        ]
     }
 }
