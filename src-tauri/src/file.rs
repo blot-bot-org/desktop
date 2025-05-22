@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
+use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 
 use serde::{Serialize, Deserialize};
 use bbcore::drawing::DrawParameters;
@@ -37,6 +37,25 @@ struct PreDrawingId {
     drawing_id: String,
 }
 
+
+macro_rules! cast_and_save {
+    ($drw_p:ty, $par:expr, $fh:expr, $drw_id:expr) => {
+        match serde_json::from_str::<$drw_p>($par) {
+            Ok(val) => { serde_json::to_writer($fh, &FsDrawing { drawing_id: $drw_id.to_string(), drawing_parameters: val }) },
+            Err(err) => Err(err)
+        }
+    }
+}
+
+macro_rules! validate_load_format {
+    ($drw_p:ty, $buf_r:expr) => {
+        match serde_json::from_reader::<_, FsDrawing<$drw_p>>($buf_r) {
+            Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
+            Err(err) => Err(err.to_string())
+        }
+    }
+}
+
 /// 
 /// A Tauri command to save a drawing method and parameters to a file.
 /// It serializes a `FsDrawing` into a string which is saved to a file.
@@ -57,36 +76,28 @@ pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Resul
 
     match match drawing_id {
             "cascade" => {
-                let params = serde_json::from_str::<CascadeParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(CascadeParameters, json_params, file_handle, "cascade")
             },
             "lines" => {
-                let params = serde_json::from_str::<LinesParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(LinesParameters, json_params, file_handle, "lines")
             },
             "bubbles" => {
-                let params = serde_json::from_str::<BubblesParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(BubblesParameters, json_params, file_handle, "bubbles")
             },
             "scribble" => {
-                let params = serde_json::from_str::<ScribbleParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(ScribbleParameters, json_params, file_handle, "scribble")
             },
             "dunes" => {
-                let params = serde_json::from_str::<DunesParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(DunesParameters, json_params, file_handle, "dunes")
             },
             "islands" => {
-                let params = serde_json::from_str::<IslandsParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(IslandsParameters, json_params, file_handle, "islands")
             },
             "waves" => {
-                let params = serde_json::from_str::<WavesParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(WavesParameters, json_params, file_handle, "waves")
             },
             "entropy" => {
-                let params = serde_json::from_str::<EntropyParameters>(json_params).unwrap();
-                serde_json::to_writer(file_handle, &FsDrawing { drawing_id: drawing_id.to_owned(), drawing_parameters: params } )
+                cast_and_save!(EntropyParameters, json_params, file_handle, "entropy")
             },
             _ => { return Err("No such drawing ID".to_owned()); }
     } {
@@ -122,52 +133,28 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
     let buf_read = BufReader::new(&file_handle);
     match match drawing_id.drawing_id.as_str() {
             "cascade" => {
-                match serde_json::from_reader::<_, FsDrawing<CascadeParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(CascadeParameters, buf_read)
             },
             "lines" => {
-                match serde_json::from_reader::<_, FsDrawing<LinesParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(LinesParameters, buf_read)
             },
             "bubbles" => {
-                match serde_json::from_reader::<_, FsDrawing<BubblesParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(BubblesParameters, buf_read)
             },
             "scribble" => {
-                match serde_json::from_reader::<_, FsDrawing<ScribbleParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(ScribbleParameters, buf_read)
             },
             "dunes" => {
-                match serde_json::from_reader::<_, FsDrawing<DunesParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(DunesParameters, buf_read)
             },
             "islands" => {
-                match serde_json::from_reader::<_, FsDrawing<IslandsParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(IslandsParameters, buf_read)
             },
             "waves" => {
-                match serde_json::from_reader::<_, FsDrawing<WavesParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(WavesParameters, buf_read)
             },
             "entropy" => {
-                match serde_json::from_reader::<_, FsDrawing<EntropyParameters>>(buf_read) {
-                    Ok(val) => Ok(serde_json::to_string(&val.drawing_parameters).unwrap()),
-                    Err(err) => Err(err.to_string())
-                }
+                validate_load_format!(EntropyParameters, buf_read)
             },
             _ => { Err("Invalid drawing type".to_owned()) }
     } {

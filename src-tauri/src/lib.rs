@@ -52,7 +52,6 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
         Err(_) => PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.),
     };
 
-
     let ins_bytes: Result<(Vec<u8>, f64, f64), String> = match style_id {
         "cascade" => {
             generate_preview!(CascadeMethod {}, CascadeParameters, json_params, &phys_dim)
@@ -87,9 +86,7 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
     };
 
     if let Err(err_str) = ins_bytes {
-
-        return format!("error:{}", err_str).to_owned();
-
+        return format!("error generating bytes:{}", err_str).to_owned();
     }
 
     let instruction_set = match ins_bytes {
