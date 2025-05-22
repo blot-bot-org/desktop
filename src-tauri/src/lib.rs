@@ -21,6 +21,16 @@ pub mod file;
 pub mod client;
 
 
+macro_rules! generate_preview {
+    ($drw_t:expr, $drw_p:ty, $jp:expr, $pdr:expr) => {
+        match serde_json::from_str::<$drw_p>($jp) {
+            Ok(val) => $drw_t.gen_instructions($pdr, &val),
+            Err(err) => return "error:".to_owned() + err.to_string().as_str(),
+        }
+    }
+}
+
+
 /// 
 /// A Tauri command used to generate a preview of a drawing, save the instructions,
 /// and returns the path to the preview image.
@@ -42,78 +52,34 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
         Err(_) => PhysicalDimensions::new(754., (754. - 210.) / 1.98, 192., 210., 297.),
     };
 
+
     let ins_bytes: Result<(Vec<u8>, f64, f64), String> = match style_id {
         "cascade" => {
-            let params = match serde_json::from_str::<CascadeParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = CascadeMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(CascadeMethod {}, CascadeParameters, json_params, &phys_dim)
         },
         "lines" => {
-            let params = match serde_json::from_str::<LinesParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = LinesMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(LinesMethod {}, LinesParameters, json_params, &phys_dim)
         },
         "bubbles" => {
-            let params = match serde_json::from_str::<BubblesParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = BubblesMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(BubblesMethod {}, BubblesParameters, json_params, &phys_dim)
         },
         "scribble" => {
-            let params = match serde_json::from_str::<ScribbleParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = ScribbleMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(ScribbleMethod {}, ScribbleParameters, json_params, &phys_dim)
         },
         "dunes" => {
-            let params = match serde_json::from_str::<DunesParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = DunesMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(DunesMethod {}, DunesParameters, json_params, &phys_dim)
         },
         "islands" => {
-            let params = match serde_json::from_str::<IslandsParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = IslandsMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(IslandsMethod {}, IslandsParameters, json_params, &phys_dim)
         },
         "waves" => {
-            let params = match serde_json::from_str::<WavesParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = WavesMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(WavesMethod {}, WavesParameters, json_params, &phys_dim)
         },
         "entropy" => {
-            let params = match serde_json::from_str::<EntropyParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = EntropyMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(EntropyMethod {}, EntropyParameters, json_params, &phys_dim)
         },
         "shades" => {
-            let params = match serde_json::from_str::<ShadesParameters>(json_params) {
-                Ok(val) => val,
-                Err(err) => return "error:".to_owned() + err.to_string().as_str(),
-            };
-            let method = ShadesMethod {};
-            method.gen_instructions(&phys_dim, &params)
+            generate_preview!(ShadesMethod {}, ShadesParameters, json_params, &phys_dim)
         },
         _ => {
             Err("error:Unknown draw type".to_owned())
