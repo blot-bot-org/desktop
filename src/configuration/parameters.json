@@ -681,6 +681,45 @@
             }
         ]
     },
+    "vinyl": {
+        "name":"Vinyl",
+        "parameters": [
+            {
+                "name":"Input Audio",
+                "id":"audio_path",
+                "description":"The input audio for the waveform",
+                "type":"file_selector",
+                "default":""
+            },
+            {
+                "name":"Width",
+                "id": "width",
+                "description": "The width of the waveform",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":100
+            },
+            {
+                "name":"Height",
+                "id": "height",
+                "description": "The height of the waveform",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":100
+            },
+            {
+                "name":"Samples",
+                "id": "num_samples",
+                "description": "The number of samples for the waveform",
+                "type": "slider",
+                "min": 10,
+                "max": 100,
+                "default":20
+            }
+        ]
+    },
     "shades": {
         "name":"Shades",
         "parameters": [

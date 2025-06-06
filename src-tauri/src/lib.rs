@@ -6,6 +6,7 @@ use bbcore::drawing::islands::{IslandsMethod, IslandsParameters};
 use bbcore::drawing::bubbles::{BubblesMethod, BubblesParameters};
 use bbcore::drawing::waves::{WavesMethod, WavesParameters};
 use bbcore::drawing::entropy::{EntropyMethod, EntropyParameters};
+use bbcore::drawing::vinyl::{VinylMethod, VinylParameters};
 use bbcore::drawing::shades::{ShadesMethod, ShadesParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
@@ -76,6 +77,9 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
         },
         "entropy" => {
             generate_preview!(EntropyMethod {}, EntropyParameters, json_params, &phys_dim)
+        },
+        "vinyl" => {
+            generate_preview!(VinylMethod {}, VinylParameters, json_params, &phys_dim)
         },
         "shades" => {
             generate_preview!(ShadesMethod {}, ShadesParameters, json_params, &phys_dim)
