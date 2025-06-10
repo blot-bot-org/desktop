@@ -34,7 +34,7 @@
         flex-grow: 1;
 
         border: none;
-        border-bottom: 1px solid #4681F4;
+        border-bottom: 1px solid var(--primary);
         box-shadow: 0px 5px 12px -3px #00000030;
 
     }

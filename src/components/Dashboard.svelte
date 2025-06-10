@@ -179,6 +179,8 @@
         justify-content: space-between;
 
         overflow: hidden;
+
+        background-color: var(--default-background);
     }
 
     .button-container {
@@ -206,15 +208,17 @@
     }
 
     #style-selector {
+        background-color: red !important;
+
         border-radius: 5px;
         box-shadow: 0px 5px 12px -1px #00000030;
         outline: none;
 
-        border: 1px solid #D0D0D0;
-        min-width: 100px;
-        min-height: 30px;
+        border: 1px solid var(--divider);
+        min-width: 140px;
+        min-height: 40px;
 
-        border-radius: 4px;
+        border-radius: 5px;
     }
 
 
@@ -232,9 +236,9 @@
         color: white;
         font-size: 1em;
 
-        border: 1px solid #2374F0;
+        border: 1px solid var(--primary-selected);
         border-radius: 5px;
-        background-color: #4681F4;
+        background-color: var(--primary);
         box-shadow: 0px 5px 12px -1px #00000030;
         outline: none;
 
@@ -245,7 +249,7 @@
 
     button:hover {
         cursor: pointer;
-        background-color: #2374F0;
+        background-color: var(--primary-selected);
     }
 
     /*

@@ -16,7 +16,7 @@
     let showingAppConfig = false;
 
     setTimeout(() => {
-        console.log(previewRef);
+        document.documentElement.setAttribute("data-theme", "dark");
     }, 500);
 
 
@@ -85,5 +85,29 @@
         height: 100% !important;
 
         background-color: #000000c5;
+    }
+
+    :global(:root) {
+        --default-background: #fff;
+        --preview-background: #ddd;
+        --divider: #f0f0f0;
+
+        --primary: #4681F4;
+        --primary-selected: #2374F0;
+
+        --default-font: #101010;
+        --sub-font: #404040;
+    }
+
+    :global([data-theme="dark"]) {
+        --default-background: #323232;
+        --preview-background: #252525;
+        --divider: #555555;
+
+        --primary: #4681F4;
+        --primary-selected: #2374F0;
+
+        --default-font: #e8e8e8;
+        --sub-font: #a0a0a0;
     }
 </style>

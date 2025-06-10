@@ -191,7 +191,8 @@ TODO:
     .window {
         position: fixed;
 
-        background-color: #FFFFFF;
+        background-color: var(--default-background);
+        color: var(--default-font);
         width: 600px !important;
         height: 400px !important;
         display: block;
@@ -222,6 +223,8 @@ TODO:
     }
 
     .tab-button {
+        color: var(--default-font);
+
         border: none;
         border-radius: 5px;
         background-color: transparent;
@@ -234,14 +237,14 @@ TODO:
 
     .tab-button.active-tab {
         color: #3384F0;
-        background-color: #F3F3F3;
+        background-color: var(--divider);
 
         font-weight: 600;
     }
 
     .tab-button:not(.active-tab):hover {
         cursor: pointer;
-        color: #3384F0;
+        color: var(--primary);
 
         font-weight: 600;
     }
@@ -260,7 +263,7 @@ TODO:
 
         width: 100%;
 
-        color: #a0a0a0;
+        color: var(--sub-font);
         font-size: 13px;
         font-weight: 500;
     }
@@ -301,12 +304,15 @@ TODO:
 
 
     .text-style {
+        background-color: var(--divider);
+        color: var(--default-font);
+
         margin-left: 40px;
         margin-right: 10px;
         flex-grow: 1;
 
         border: none;
-        border-bottom: 1px solid #D0D0D0;
+        border-bottom: 1px solid --var(divider);
         border-radius: 3px;
         box-shadow: 0px 5px 12px -6px #00000030;
 
@@ -328,8 +334,8 @@ TODO:
     }
 
     .button {
-        background-color: #3384F0;
-        border: 1px solid #2374F0;
+        background-color: var(--primary);
+        border: 1px solid var(--primary-selected);
         padding: 5px 10px 6px 10px;
 
         border-radius: 5px;
@@ -342,7 +348,7 @@ TODO:
     }
 
     .button:hover {
-        background-color: #2374F0;
+        background-color: var(--primary-selected);
     }
 
     .error-text {

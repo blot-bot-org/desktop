@@ -88,11 +88,11 @@
             {steps}
             bind:current={stepValue}
             line="0.12em"
-            primary="var(--bs-primary, #4681F4)"
+            primary="var(--primary, #ff0000)"
             secondary="var(--bs-secondary, #dddddd)"
             clickable={false}
             size="1.5em"
-        />
+        /> <!-- to fix! -->
     </div>
 
     
@@ -161,8 +161,8 @@
 
 
     .button {
-        background-color: #3384F0;
-        border: 1px solid #2374F0;
+        background-color: var(--primary);
+        border: 1px solid var(--primary-selected);
         padding: 5px 10px 6px 10px;
 
         border-radius: 5px;
@@ -175,6 +175,6 @@
     }
 
     .button:hover {
-        background-color: #2374F0;
+        background-color: var(--primary-selected);
     }
 </style>

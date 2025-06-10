@@ -22,6 +22,8 @@
 
 <style>
     .number-container {
+        color: var(--default-font);
+    
         display: flex;
         margin: 6px 30px 6px 30px;
 
@@ -32,9 +34,13 @@
     .number-style {
         max-width: 300px;
         width: 30%;
-        height: 24px;
+        height: 28px;
 
         border: none;
+        border-radius: 4px;
         text-align: center;
+
+        background-color: var(--divider);
+        color: var(--default-font);
     }
 </style>

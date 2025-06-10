@@ -114,14 +114,14 @@
 
 <style>
     #preview-container {
-        background-color: #D0D0D0;
+        background-color: var(--preview-background);
         height: 100%;
         width: 65% !important; /* master width */
 
         box-shadow: inset -68px 0px 18px -67px rgba(0,0,0,0.08);
 
         box-sizing: border-box;
-        border-right: 1px solid #C0C0C0;
+        border-right: 1px solid var(--divider);
     }
 
     #preview-image-container {

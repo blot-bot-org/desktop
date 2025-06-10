@@ -40,6 +40,8 @@
 
 <style>
     .file-container {
+        color: var(--default-font);
+
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -47,21 +49,22 @@
         margin-left: 30px;
         margin-right: 30px;
 
-        margin-bottom: 12px;
+        margin-bottom: 8px;
+        margin-top: 8px;
     }
 
     .button-style {
         width: 100px;
 
-        padding: 5px 8px 5px 8px;
+        padding: 7px 8px 7px 8px;
 
         text-align: center;
         color: white;
 
-        border: 1px solid #2374F0;
+        border: 1px solid var(--primary-selected);
         border-radius: 5px;
 
-        background-color: #4681F4;
+        background-color: var(--primary);
         box-shadow: 0px 5px 12px -1px #00000030;
 
         transition: 0.2s;
@@ -69,7 +72,7 @@
 
     .button-style:hover {
         cursor: pointer;
-        background-color: #2374F0;
+        background-color: var(--primary-selected);
     }
 </style>
 

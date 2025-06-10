@@ -338,7 +338,9 @@
     #client-window {
         position: fixed;
 
-        background-color: #FFFFFF;
+        background-color: var(--default-background);
+        color: var(--default-font);
+
         width: 800px !important;
         height: 600px !important;
         display: block;

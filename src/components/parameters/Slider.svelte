@@ -22,6 +22,8 @@
 
 <style>
     .slider-container {
+        color: var(--default-font);
+
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -41,14 +43,14 @@
     }
 
     .slider-style::-webkit-slider-runnable-track  {
-        background: #D0D0D0;
+        background: var(--divider);
         height: 2px;
 
         border-radius: 3px;
     }
 
     .slider-style::-moz-range-track {
-        background: #D0D0D0;
+        background: var(--preview-background);
         height: 2px;
 
         border-radius: 3px;
@@ -58,7 +60,7 @@
         -webkit-appearance: none;
         appearance: none;
 
-        background: #000000;
+        background: var(--default-font);
         margin-top: -7px;
         height: 16px;
         width: 6px;
@@ -68,7 +70,7 @@
     }
 
     .slider-style::-webkit-slider-thumb:hover {
-        background: #555555;
+        background: var(--default-font);
     }
 
 
