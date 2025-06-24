@@ -16,7 +16,7 @@
     let showingAppConfig = false;
 
     setTimeout(() => {
-        document.documentElement.setAttribute("data-theme", "dark");
+        // document.documentElement.setAttribute("data-theme", "dark");
     }, 500);
 
 

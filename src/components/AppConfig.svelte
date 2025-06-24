@@ -114,14 +114,6 @@
 </script>
 
 
-<!--
-TODO:
-- Test is state is preserved when element is bound value but disappears you feel ( it needs storing somewhere )
-- Save button should perform checks, and load the appropriate tab and error messages, or save properly
-- Rust function should be invoked to save it properly VIA json
--->
-
-
 <div class="fixed-background" />
 
 <div class="window">

@@ -54,21 +54,6 @@
         props.printPressed();
     }
 
-    function handleToast(payload: any) {
-
-        const toast_duration = 10E3 * 30;
-            
-        if(payload["event"] == "connection") {
-            if(payload["error"]) {
-                toast.error("Error: " + payload["message"], { position: "bottom-center", duration: toast_duration });
-            } else {
-                toast.success(payload["message"], { position: "bottom-center", duration: toast_duration });
-            }
-        } else if(payload["event"] == "drawing") {
-            toast.success(payload["message"], { position: "bottom-center", duration: toast_duration });
-        }
-    }
-
     async function saveFile() {
         let path = await save({
             filter: [
@@ -85,7 +70,7 @@
         }
 
         await invoke("save_file", { path: path, drawingId: styleId, jsonParams: JSON.stringify(parameterObject) });
-        alert("file saved.");
+        toast.success("File saved!", { position: "bottom-center", duration: 3000 });
     }
 
     async function openFile() {
@@ -107,7 +92,7 @@
                 props.onStateChange(styleId, parameterObject);
             })
             .catch((err) => {
-                alert(err);
+                toast.error(`Error opening file! ${err}`, { position: "bottom-center", duration: 3000 });
             });
     }
 
@@ -200,6 +185,8 @@
     }
 
     .style-container {
+        color: var(--default-font);
+
         display: flex;
         align-items: center;
 
@@ -208,8 +195,6 @@
     }
 
     #style-selector {
-        background-color: red !important;
-
         border-radius: 5px;
         box-shadow: 0px 5px 12px -1px #00000030;
         outline: none;

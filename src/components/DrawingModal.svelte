@@ -55,7 +55,7 @@
         }
 
         if(progress == 0) {
-            ModalLayout.applyLayout(new ModalLayout(false, "", "The pen is moving towards the starting position. Please wait..."));
+            ModalLayout.applyLayout(new ModalLayout(true, "Cancel", "The pen is moving towards the starting position. Please wait..."));
             progress = 1;
             stepValue = 1;
 
@@ -69,6 +69,8 @@
                     ModalLayout.applyLayout(new ModalLayout(true, "Close", err));
                     progress = -1;
                 });
+        } else if (progress == 1) {
+            props.onError();
         } else if(progress == 2) {
             stepValue = 3;
             ModalLayout.applyLayout(new ModalLayout(false, "", "Drawing is starting..."));
@@ -88,7 +90,7 @@
             {steps}
             bind:current={stepValue}
             line="0.12em"
-            primary="var(--primary, #ff0000)"
+            primary="var(--bs-primary, #000000)"
             secondary="var(--bs-secondary, #dddddd)"
             clickable={false}
             size="1.5em"

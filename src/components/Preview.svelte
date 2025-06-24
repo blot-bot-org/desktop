@@ -4,6 +4,7 @@
     import { onMount } from "svelte";
     import { fade } from "svelte/transition"
 	import { Pulse } from 'svelte-loading-spinners';
+    import toast, { Toaster } from "svelte-french-toast";
 
 
     let imageWidth = $state(210);
@@ -30,12 +31,6 @@
         let stageWidth = previewStageElement.getBoundingClientRect().width * (1 - (2 * marginRatio));
         let stageHeight = previewStageElement.getBoundingClientRect().height * (1 - (2 * marginRatio));
 
-        // these values are the left / top offset as a margin - still need to add
-        /*
-        let leftMargin = (marginRatio * stageWidth) / (1 - 2 * (marginRatio);
-        let topMargin = (marginRatio * stageHeight) / (1 - 2 * (marginRatio);
-        */
-
         // calculate dimension to maximise
         let ratio = realImgWidth / realImgHeight;
         let maxWidth = true; // this if statement can be simplified
@@ -52,8 +47,6 @@
             imageHeight = Math.round(stageHeight);
         }
     }
-  
-
 
 
     let imageSrc = $state("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANIAAAEpAQMAAADcde5vAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAAB9JREFUGBntwTEBAAAAwiD7p14IX2AAAAAAAAAAAIcAIHwAAU/BTAIAAAAASUVORK5CYII=");
@@ -72,7 +65,7 @@
         let path = await invoke("gen_preview", { styleId: style_id, jsonParams: JSON.stringify(parameter_object) });
         
         if(path.startsWith("error")) {
-            alert(path.split(":")[1]);
+            toast.error(`Error generating preview! ${path.split(":")[1]}`, { position: "bottom-center", duration: 3000 });
             clearTimeout(timeoutRef);
             return;
         }
