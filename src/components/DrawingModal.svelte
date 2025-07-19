@@ -1,6 +1,7 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
     import { Steps } from "svelte-steps";
+    import StepBar from "$components/steps/StepBar.svelte";
 
     const steps = [
         { text: "" },
@@ -75,7 +76,7 @@
             stepValue = 3;
             ModalLayout.applyLayout(new ModalLayout(false, "", "Drawing is starting..."));
 
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, 3000)); // gives time to run over and move pen etc
             
             props.onDraw();
         }
@@ -86,6 +87,7 @@
 <div id="modal-container">
 
     <div id="progress-container">
+        <!--
         <Steps
             {steps}
             bind:current={stepValue}
@@ -94,7 +96,9 @@
             secondary="var(--bs-secondary, #dddddd)"
             clickable={false}
             size="1.5em"
-        /> <!-- to fix! -->
+        />
+        -->
+        <StepBar activeWidth={30} numBars={5} bind:progress={stepValue} />
     </div>
 
     
