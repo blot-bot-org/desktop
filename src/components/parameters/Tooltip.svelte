@@ -11,8 +11,8 @@
     onMount(() => {
         tippy(element, {
             content: text,
-            delay: [1000, 0],
-            duration: [300, 300],
+            delay: [100, 0],
+            duration: [200, 200],
             placement: "left",
             animation: "fade",
             theme: 'light',

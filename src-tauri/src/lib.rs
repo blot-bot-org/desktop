@@ -112,7 +112,12 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
 
     let preview_path = cache_dir.join("preview.png");
 
-    generate_preview((instruction_set.get_init().0, instruction_set.get_init().1), &phys_dim, &instruction_set, preview_path.to_str().unwrap());
+    match generate_preview((instruction_set.get_init().0, instruction_set.get_init().1), &phys_dim, &instruction_set, preview_path.to_str().unwrap()) {
+        Some(err) => {
+            return format!("error generate bytes:{}", err).to_owned();
+        },
+        None => {}
+    };
 
     preview_path.to_str().unwrap().to_owned()
 }
