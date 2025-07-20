@@ -13,11 +13,14 @@
         selfElement.style.width = `${(state ? activeWidth : defaultWidth)}%`;
     }
 
-    export function setColoured(state: string): void {
+    // gives a bar a colour if state true, if err false bar primary accent, if err true, bar error colour
+    export function setColoured(state: bool, err: bool): void {
         if(state) {
-            selfElement.classList.add("bar-colour");
+            selfElement.classList.remove("bar-colour-" + (!err ? "in" : "") + "valid");
+            selfElement.classList.add("bar-colour-" + (err ? "in" : "") + "valid");
         } else {
-            selfElement.classList.remove("bar-colour");
+            selfElement.classList.remove("bar-colour-invalid");
+            selfElement.classList.remove("bar-colour-valid");
         }
 
     }
@@ -35,14 +38,18 @@
 <style>
     .bar {
         width: 30px;
-        height: 10px;
-        background-color: #bdbdbd;
-        border-radius: 5px;
+        height: 11px;
+        background-color: var(--preview-background);
+        border-radius: 8px;
         border: 3px solid white; /* whatever the bg is */
         box-sizing: border-box;
     }
 
-    :global(.bar-colour) {
+    :global(.bar-colour-valid) {
         background-color: var(--primary) !important;
+    }
+
+    :global(.bar-colour-invalid) {
+        background-color: var(--error) !important;
     }
 </style>

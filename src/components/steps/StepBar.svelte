@@ -9,6 +9,7 @@
     export let numBars: number;
     export let activeWidth: number;
     export let progress: number;
+    export let isError;
 
     let refList = [];
     let remainingWidth = 100 - activeWidth;
@@ -16,6 +17,7 @@
 
     $: {
         if(mounted) {
+            isError; // update on error as well.
             if(progress >= 0) { // != -1
                 setBarActive(progress);
             }
@@ -26,7 +28,7 @@
         // set all bars up to idx to blue, set all as short
         for(let i = 0; i < numBars; i++) {
             if(i <= idx) {
-                refList[i].setColoured(true);
+                refList[i].setColoured(true, isError);
             }
             refList[i].setWide(false);
         }

@@ -94,6 +94,7 @@
 
         --primary: #4681F4;
         --primary-selected: #2374F0;
+        --error: #aaa;
 
         --default-font: #101010;
         --sub-font: #404040;
@@ -106,6 +107,7 @@
 
         --primary: #4681F4;
         --primary-selected: #2374F0;
+        --error: #aaa;
 
         --default-font: #e8e8e8;
         --sub-font: #a0a0a0;

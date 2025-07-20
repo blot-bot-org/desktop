@@ -1,6 +1,5 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
-    import { Steps } from "svelte-steps";
     import StepBar from "$components/steps/StepBar.svelte";
 
     const steps = [
@@ -17,6 +16,8 @@
 
     let stepValue = $state(0);
     let progress: number = $state(0);
+    let isError = $derived((() => progress == -1)());
+
     let buttonText = $state("Done");
     let buttonShowing = $state(true);
     let text = $state("");
@@ -67,7 +68,7 @@
                     stepValue = 2;
                 })
                 .catch((err) => {
-                    ModalLayout.applyLayout(new ModalLayout(true, "Close", err));
+                    ModalLayout.applyLayout(new ModalLayout(true, "Close", "Error: " + err));
                     progress = -1;
                 });
         } else if (progress == 1) {
@@ -87,18 +88,7 @@
 <div id="modal-container">
 
     <div id="progress-container">
-        <!--
-        <Steps
-            {steps}
-            bind:current={stepValue}
-            line="0.12em"
-            primary="var(--bs-primary, #000000)"
-            secondary="var(--bs-secondary, #dddddd)"
-            clickable={false}
-            size="1.5em"
-        />
-        -->
-        <StepBar activeWidth={30} numBars={5} bind:progress={stepValue} />
+        <StepBar activeWidth={30} numBars={5} bind:progress={stepValue} bind:isError={isError} />
     </div>
 
     
