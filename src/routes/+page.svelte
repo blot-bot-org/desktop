@@ -31,7 +31,7 @@
         <Preview bind:this={previewRef} />
 
         {#if previewRef} <!-- used to defer loading until preview_ref is initialised -->
-        <Dashboard bind:this={dashboardRef} onStateChange={(styleId, parameterObject) => { previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onAppConfigOpen={() => { showingAppConfig = true; console.log("hi"); }} />
+        <Dashboard bind:this={dashboardRef} onStateChange={async (styleId, parameterObject) => { await previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onAppConfigOpen={() => { showingAppConfig = true; console.log("hi"); }} />
         {/if}
         
         {#if showingModal && previewRef}

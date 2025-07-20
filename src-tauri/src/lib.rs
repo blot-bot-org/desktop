@@ -143,6 +143,7 @@ pub fn run() {
             client::stop_drawing,
             client::save_machine_config,
             client::get_machine_config,
+            client::get_time_estimation,
             file::save_file,
             file::open_file,
             file::get_app_config,

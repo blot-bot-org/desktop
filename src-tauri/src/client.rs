@@ -1,5 +1,6 @@
 use std::io::{BufRead, BufReader, Read};
 use std::ops::DerefMut;
+use bbcore::client;
 use tokio::sync::Mutex;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use std::sync::Arc;
@@ -227,6 +228,39 @@ pub async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> 
     Ok(())
 
 }
+
+
+/// 
+/// Estimates the drawing time, used for the 'Print' button.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - A u64 representing the estimated time taken to draw a drawing at 500s/s, or 0
+///
+#[tauri::command(async)]
+pub async fn get_time_estimation(app: tauri::AppHandle) -> u64 {
+
+    let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
+    let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
+
+    // getting instruction bytes
+    let ins_file_path = cache_dir.join("instructions.bin");
+    let mut ins_file = File::open(ins_file_path).unwrap();
+    let mut buffer = Vec::new();
+    let _ = ins_file.read_to_end(&mut buffer).unwrap();
+
+    let ins_set = match InstructionSet::new(buffer, 0., 0.) { 
+        Ok(val) => { val },
+        Err(e) => { println!("{e}"); return 0; },
+    };
+
+    let dur = client::calculate_draw_time(&ins_set.get_binary(), 500, 0);
+
+    dur.as_secs()
+}
+
 
 /// 
 /// A thread-safe global state containing values of the drawing state.
