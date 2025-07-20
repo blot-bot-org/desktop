@@ -29,13 +29,10 @@
     let styleName = $state("");
     let parameterObject = $state({});
 
-    let drawTimeSeconds = $state(-1);
-
     export async function make_preview(event: Event) {
         if(event) event.preventDefault();
 
         await props.onStateChange(styleId, parameterObject);
-        updateTime();
 
     }
 
@@ -50,7 +47,6 @@
         }
         
         await props.onStateChange(styleId, parameterObject);
-        updateTime();
     }
 
     async function print() {
@@ -93,39 +89,10 @@
                 parameterObject = JSON.parse(val[1]);
 
                 await props.onStateChange(styleId, parameterObject);
-                updateTime();
             })
             .catch((err) => {
                 toast.error(`Error opening file! ${err}`, { position: "bottom-center", duration: 3000 });
             });
-    }
-
-    async function updateTime() {
-        await invoke("get_time_estimation")
-            .then((seconds) => {
-                if(seconds == 0) {
-                    drawTimeSeconds = -1;
-                }
-                drawTimeSeconds = seconds;
-            })
-            .catch((err) => {
-                drawTimeSeconds = -1;
-            });
-    }
-
-    function formatTime(timeSeconds) {
-        // we'll build it backwards, adding components as needed.
-
-        let time = (timeSeconds % 60).toString() + "s";
-        if(timeSeconds > 60) {
-            time = (Math.floor((timeSeconds / 60) % 60)).toString() + "m " + time;
-        }
-
-        if(timeSeconds > 60 * 60) {
-            time = (Math.floor(timeSeconds / 60 / 60)).toString() + "h " + time;
-        }
-        
-        return time;
     }
 
     switchStyle(initialStyleId);
@@ -176,12 +143,7 @@
         
 
         <div class="button-container">
-            <button style="margin-right: 5px !important;" id="print-button" onclick={print}>
-                Print
-                {#if drawTimeSeconds >= 0}
-                    &nbsp;{"(" + formatTime(drawTimeSeconds) + " @ 500s/s)"}
-                {/if}
-            </button>
+            <button style="margin-right: 5px !important;" id="print-button" onclick={print}>Print</button>
             <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onAppConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
         </div>
 

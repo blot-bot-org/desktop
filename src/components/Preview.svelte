@@ -10,6 +10,9 @@
     let imageWidth = $state(210);
     let imageHeight = $state(297);
 
+    let estDrawTimeSeconds = $state(-1);
+    let instructionByteNumber = $state(0);
+
     (async () => {
         const unlisten = await getCurrentWindow().onResized(({ payload: size }) => {
             recomputeImageResolution(imageWidth, imageHeight);
@@ -67,11 +70,16 @@
         if(path.startsWith("error")) {
             toast.error(`Error generating preview! ${path.split(":")[1]}`, { position: "bottom-center", duration: 3000 });
             clearTimeout(timeoutRef);
+
+            estDrawTimeSeconds = -1;
+            instructionByteNumber = 0;
+
             return;
         }
 
-        let imageUrl = convertFileSrc(path);
+        await updateTime();
 
+        let imageUrl = convertFileSrc(path);
         clearTimeout(timeoutRef);
         renderLoadingOverlay = false;
   
@@ -90,6 +98,35 @@
     onMount(() => {
         recomputeImageResolution(); // resize the initial blank image
     });
+
+    async function updateTime() {
+        await invoke("get_image_stats")
+            .then((out) => { // out[0] = time in seconds, out[1] = num of bytes
+                if(out[0] == 0) {
+                    estDrawTimeSeconds = -1;
+                }
+                estDrawTimeSeconds = out[0];
+                instructionByteNumber = out[1];
+            })
+            .catch((err) => {
+                estDrawTimeSeconds = -1;
+            });
+    }
+
+    function formatTime(timeSeconds) {
+        // we'll build it backwards, adding components as needed.
+
+        let time = (timeSeconds % 60).toString() + "s";
+        if(timeSeconds > 60) {
+            time = (Math.floor((timeSeconds / 60) % 60)).toString() + "m " + time;
+        }
+
+        if(timeSeconds > 60 * 60) {
+            time = (Math.floor(timeSeconds / 60 / 60)).toString() + "h " + time;
+        }
+        
+        return time;
+    }
 </script>
 
 <div id="preview-container">
@@ -102,6 +139,12 @@
                 </div>
             {/if}
         </div>
+    </div>
+
+    <div id="preview-stat-container">
+        <a class="stat-title stat-text">Image stats:</a>
+        <a class="stat-text">Instruction bytes: {(instructionByteNumber > 0 ? instructionByteNumber : "none")}</a>
+        <a class="stat-text">Est. drawing time: {#if estDrawTimeSeconds >= 0}{formatTime(estDrawTimeSeconds)} @ 500 s/s{:else}unknown{/if}</a>
     </div>
 </div>
 
@@ -139,6 +182,31 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    #preview-stat-container {
+        background-color: #00000050;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+
+        padding: 6px;
+        border-top-right-radius: 6px;
+
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-text {
+        color: #ffffffaa;
+    }
+
+    .stat-title {
+        text-transform: uppercase;
+        opacity: 0.8;
+        font-weight: 600;
+        font-size: 0.8em;
+        letter-spacing: 0.4px;
     }
 
 

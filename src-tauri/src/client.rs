@@ -240,7 +240,7 @@ pub async fn stop_drawing(app: tauri::AppHandle, state: State<'_, AppState>) -> 
 /// - A u64 representing the estimated time taken to draw a drawing at 500s/s, or 0
 ///
 #[tauri::command(async)]
-pub async fn get_time_estimation(app: tauri::AppHandle) -> u64 {
+pub async fn get_image_stats(app: tauri::AppHandle) -> (u64, usize) {
 
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
@@ -253,12 +253,12 @@ pub async fn get_time_estimation(app: tauri::AppHandle) -> u64 {
 
     let ins_set = match InstructionSet::new(buffer, 0., 0.) { 
         Ok(val) => { val },
-        Err(e) => { println!("{e}"); return 0; },
+        Err(e) => { println!("{e}"); return (0, 0); },
     };
 
     let dur = client::calculate_draw_time(&ins_set.get_binary(), 500, 0);
 
-    dur.as_secs()
+    (dur.as_secs(), ins_set.get_binary().len())
 }
 
 
