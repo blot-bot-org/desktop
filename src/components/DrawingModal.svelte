@@ -63,7 +63,7 @@
 
             await invoke("move_pen_to_start")
                 .then(() => {
-                    ModalLayout.applyLayout(new ModalLayout(true, "Start", "Drawing is ready to begin. Press 'Start' to begin a 5 second countdown."));
+                    ModalLayout.applyLayout(new ModalLayout(true, "Start", "Drawing is ready to begin. Press 'Start' to begin a 3 second countdown."));
                     progress = 2;
                     stepValue = 2;
                 })
@@ -88,7 +88,7 @@
 <div id="modal-container">
 
     <div id="progress-container">
-        <StepBar activeWidth={30} numBars={5} bind:progress={stepValue} bind:isError={isError} />
+        <StepBar activeWidth={40} numBars={4} bind:progress={stepValue} bind:isError={isError} />
     </div>
 
     
