@@ -8,6 +8,7 @@ use bbcore::drawing::waves::{WavesMethod, WavesParameters};
 use bbcore::drawing::entropy::{EntropyMethod, EntropyParameters};
 use bbcore::drawing::vinyl::{VinylMethod, VinylParameters};
 use bbcore::drawing::shades::{ShadesMethod, ShadesParameters};
+use bbcore::drawing::atom::{AtomMethod, AtomParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
@@ -83,6 +84,9 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
         },
         "shades" => {
             generate_preview!(ShadesMethod {}, ShadesParameters, json_params, &phys_dim)
+        },
+        "atom" => {
+            generate_preview!(AtomMethod {}, AtomParameters, json_params, &phys_dim)
         },
         _ => {
             Err("error:Unknown draw type".to_owned())

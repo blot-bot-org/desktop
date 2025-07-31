@@ -760,5 +760,73 @@
                 "default":20
             }
         ]
+    },
+    "atom": {
+        "name":"Atom",
+        "parameters": [
+            {
+                "name":"Random Seed",
+                "id":"seed",
+                "description": "A seed for the RNG",
+                "type":"number",
+                "min": 1,
+                "max": 4294967294,
+                "default": 1000
+            },
+            {
+                "name":"Shell Count",
+                "id": "num_shells",
+                "description": "The number of shells to draw",
+                "type": "slider",
+                "min": 1,
+                "max": 50,
+                "default":10
+            },
+            {
+                "name":"Max shell radius",
+                "id": "max_shell_width",
+                "description": "The maximum radius of the shells",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":60
+            },
+            {
+                "name":"Min shell radius",
+                "id": "min_shell_width",
+                "description": "The minimum radius of the shells",
+                "type": "number",
+                "min": 1,
+                "max": 300,
+                "default":40
+            },
+            {
+                "name":"Nucleus Circles",
+                "id": "nucleus_circles",
+                "description": "The number of circles to draw, to create the nucleus",
+                "type": "slider",
+                "min": 1,
+                "max": 40,
+                "default":8
+            },
+            {
+                "name":"Nucleus Radius",
+                "id": "nucleus_size",
+                "description": "The radius the nucleus",
+                "type": "number",
+                "min": 1,
+                "max": 40,
+                "default":8
+            },
+            {
+                "name":"Nucleus Scribble",
+                "id": "nucleus_scramble",
+                "description": "The scale of randomness applied to the nucleus",
+                "type": "number",
+                "min": 1,
+                "max": 40,
+                "default":5
+            }
+        ]
     }
 }

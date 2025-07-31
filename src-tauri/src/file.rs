@@ -12,6 +12,7 @@ use bbcore::drawing::bubbles::BubblesParameters;
 use bbcore::drawing::waves::WavesParameters;
 use bbcore::drawing::entropy::EntropyParameters;
 use bbcore::drawing::vinyl::VinylParameters;
+use bbcore::drawing::atom::AtomParameters;
 
 /// 
 /// Used to serialize / deserialize a save file, including the drawing method ID.
@@ -103,6 +104,9 @@ pub async fn save_file(path: &str, drawing_id: &str, json_params: &str) -> Resul
             "vinyl" => {
                 cast_and_save!(VinylParameters, json_params, file_handle, "vinyl")
             },
+            "atom" => {
+                cast_and_save!(AtomParameters, json_params, file_handle, "atom")
+            },
             _ => { return Err("No such drawing ID".to_owned()); }
     } {
         Ok(()) => {},
@@ -162,6 +166,9 @@ pub async fn open_file(path: &str) -> Result<(String, String), String> {
             },
             "vinyl" => {
                 validate_load_format!(VinylParameters, buf_read)
+            },
+            "atom" => {
+                validate_load_format!(AtomParameters, buf_read)
             },
             _ => { Err("Invalid drawing type".to_owned()) }
     } {
