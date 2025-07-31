@@ -93,8 +93,6 @@
 
 
     function handleProgress(payload) {
-        console.log(payload)
-
         if(payload["event"] == "populate_network") {
             updateWindow({ _msAddress: payload["address"] });
         }

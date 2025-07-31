@@ -55,8 +55,8 @@
     let imageSrc = $state("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANIAAAEpAQMAAADcde5vAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAAB9JREFUGBntwTEBAAAAwiD7p14IX2AAAAAAAAAAAIcAIHwAAU/BTAIAAAAASUVORK5CYII=");
     let renderLoadingOverlay = $state(true);
   
-    export async function gen_preview(style_id, parameter_object) {
-        if(style_id == undefined || parameter_object == undefined) {
+    export async function gen_preview(styleId, parameterObject) {
+        if(styleId == undefined || parameterObject == undefined) {
             console.log("Could not generate preview as style or parameters were undefined.");
             return;
         }
@@ -65,7 +65,14 @@
             renderLoadingOverlay = true;
         }, 250);
 
-        let path = await invoke("gen_preview", { styleId: style_id, jsonParams: JSON.stringify(parameter_object) });
+
+        // custom plugin handling for parameters, we need to serialize the object to a string
+        let parameterClone = parameterObject;
+        if(styleId == "custom") {
+            parameterClone = {"plugin_path":parameterObject["plugin_path"], "plugin_parameters_json":JSON.stringify(parameterObject)};
+        }
+
+        let path = await invoke("gen_preview", { styleId: styleId, jsonParams: JSON.stringify(parameterClone) });
         
         if(path.startsWith("error")) {
             toast.error(`Error generating preview! ${path.split(":")[1]}`, { position: "bottom-center", duration: 3000 });

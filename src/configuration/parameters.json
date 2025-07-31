@@ -828,5 +828,25 @@
                 "default":5
             }
         ]
+    },
+    "custom": {
+        "name":"Custom Plugin",
+        "parameters": [
+            {
+                "name":"Plugin Selector",
+                "id":"plugin_path",
+                "description":"The path of the plugin file",
+                "type":"file_selector",
+                "default":""
+            },
+            {
+                "name":".Plugin Parameters",
+                "id": "plugin_parameters_json",
+                "description": "The JSON parameters of the Python plugin",
+                "type": "text",
+                "maxlength": 9999,
+                "default":"{}"
+            }
+        ]
     }
 }

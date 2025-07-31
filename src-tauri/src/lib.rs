@@ -9,6 +9,7 @@ use bbcore::drawing::entropy::{EntropyMethod, EntropyParameters};
 use bbcore::drawing::vinyl::{VinylMethod, VinylParameters};
 use bbcore::drawing::shades::{ShadesMethod, ShadesParameters};
 use bbcore::drawing::atom::{AtomMethod, AtomParameters};
+use bbcore::drawing::custom::{CustomMethod, CustomParameters};
 use bbcore::hardware::PhysicalDimensions;
 use bbcore::drawing::DrawMethod;
 use bbcore::preview::generate_preview;
@@ -21,6 +22,7 @@ use std::sync::Arc;
 
 pub mod file;
 pub mod client;
+pub mod plugin_handler;
 
 
 macro_rules! generate_preview {
@@ -88,6 +90,9 @@ fn gen_preview(app: tauri::AppHandle, style_id: &str, json_params: &str) -> Stri
         "atom" => {
             generate_preview!(AtomMethod {}, AtomParameters, json_params, &phys_dim)
         },
+        "custom" => {
+            generate_preview!(CustomMethod {}, CustomParameters, json_params, &phys_dim)
+        },
         _ => {
             Err("error:Unknown draw type".to_owned())
         }
@@ -152,6 +157,7 @@ pub fn run() {
             file::open_file,
             file::get_app_config,
             file::save_app_config,
+            plugin_handler::get_parameters,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

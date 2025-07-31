@@ -26,25 +26,49 @@
     const initialStyleId = drawStyles[0]; 
 
     let styleId = $state("");
-    let styleName = $state("");
     let parameterObject = $state({});
 
-    export async function make_preview(event: Event) {
+    let customParametersFile = $state({}); // holds the same stuff as the parameters.json file
+
+    export async function makePreview(event: Event) {
         if(event) event.preventDefault();
 
         await props.onStateChange(styleId, parameterObject);
 
     }
 
+
+    async function loadCustomParameters() {
+
+        // if this is the case, the plugin parameters haven't been loaded / display yet
+        // 2 is significant because the parameters.json contains 2 base parameters for custom drawing
+        if(Object.keys(parameterObject).length != 2) return;
+
+        await invoke("get_parameters", { path: parameterObject["plugin_path"] })
+            .then(async (val) => {
+                let json = JSON.parse(val);
+                customParametersFile = json;
+                for(let object of customParametersFile["parameters"]) {
+                    parameterObject[object.id] = object.default;
+                }
+
+            })
+            .catch((err) => {
+                toast.error(`Error getting plugin parameters! ${err}`, { position: "bottom-center", duration: 3000 });
+            });
+    }
+
+
     async function switchStyle(newStyleId) {
         parameterObject = {};
+        customParametersFile = {};
 
         styleId = newStyleId;
-        styleName = Parameters[styleId]["name"];
 
         for(let object of Parameters[styleId]["parameters"]) {
             parameterObject[object.id] = object.default;
         }
+
         
         await props.onStateChange(styleId, parameterObject);
     }
@@ -118,18 +142,54 @@
 
     <div class="parameter-container">
         <Divider />
-        {#each Parameters[styleId]["parameters"] as param}
-            {#if param.type == "slider"}
-                <Slider min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
-            {:else if param.type == "number"}
-                <Number min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
-            {:else if param.type == "text"}
-                <Text maxlength={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
-            {:else if param.type == "file_selector"}
-                <FileSelector name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => make_preview(undefined)} />
+
+        {#if styleId == "custom"}
+
+            <FileSelector name={"Plugin File"} id={"plugin_path"} description={"The path to the Python file"} bind:value={parameterObject["plugin_path"]} onChangeCallback={async () => { await loadCustomParameters(); await makePreview(undefined); } } />
+
+            {#if parameterObject.length != 2}
+                <Divider />
             {/if}
-            <Divider />
-        {/each}
+
+            {#each customParametersFile["parameters"] as param}
+                {#if !param.name.startsWith(".")} <!-- ignore hidden parameters (name starts with a .) -->
+
+                    {#if param.type == "slider"}
+                        <Slider min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "number"}
+                        <Number min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "text"}
+                        <Text maxlength={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "file_selector"}
+                        <FileSelector name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {/if}
+
+                    <Divider />
+                
+                {/if}
+            {/each} 
+
+        {:else}
+
+            {#each Parameters[styleId]["parameters"] as param}
+                {#if !param.name.startsWith(".")} <!-- ignore hidden parameters (name starts with a .) -->
+
+                    {#if param.type == "slider"}
+                        <Slider min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "number"}
+                        <Number min={param.min} max={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "text"}
+                        <Text maxlength={param.max} name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {:else if param.type == "file_selector"}
+                        <FileSelector name={param.name} id={param.id} description={param.description} bind:value={parameterObject[param.id]} onChangeCallback={() => makePreview(undefined)} />
+                    {/if}
+
+                    <Divider />
+                
+                {/if}
+            {/each}
+
+        {/if}
     </div>
 
     </div>
