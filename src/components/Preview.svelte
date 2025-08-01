@@ -95,7 +95,7 @@
         
         setTimeout(() => {
             recomputeImageResolution();
-        }, 50); // kinda bad, but only every visually bugs when page dimensions change... how to wait for image to finish loading?
+        }, 100); // kinda bad, but only every visually bugs when page dimensions change... how to wait for image to finish loading?
     }
   
     export function getImageUrl(): string {

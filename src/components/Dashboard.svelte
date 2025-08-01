@@ -38,24 +38,42 @@
     }
 
 
-    async function loadCustomParameters() {
+    async function loadCustomParameters(newFile: bool) {
 
-        // if this is the case, the plugin parameters haven't been loaded / display yet
-        // 2 is significant because the parameters.json contains 2 base parameters for custom drawing
-        if(Object.keys(parameterObject).length != 2) return;
-
+        // this lazy loads all parameters if newFile is not new
+        // it preserves any pre-existing parameter values
+        // it removes any old parameters which have been removed
+        // it adds any new parameters which have been added in
         await invoke("get_parameters", { path: parameterObject["plugin_path"] })
             .then(async (val) => {
+
+                // load parameters as json, including filename etc
                 let json = JSON.parse(val);
                 customParametersFile = json;
+
+
+                // these are the keys to keep
+                let currentKeys = Object.keys(parameterObject);
+                let newKeys = json["parameters"].map(p => p.id);
+
+                // delete all keys which arent in new obj, excluding plugin path and parameters
+                for(let key in parameterObject) {
+                    if (!newKeys.includes(key) && key != "plugin_path" && key != "plugin_parameters_json") {
+                        delete parameterObject[key];
+                    }
+                }
+
                 for(let object of customParametersFile["parameters"]) {
-                    parameterObject[object.id] = object.default;
+                    if(!currentKeys.includes(object.id) || newFile) {
+                        parameterObject[object.id] = object.default;
+                    }
                 }
 
             })
             .catch((err) => {
                 toast.error(`Error getting plugin parameters! ${err}`, { position: "bottom-center", duration: 3000 });
             });
+
     }
 
 
@@ -92,7 +110,14 @@
             return;
         }
 
-        await invoke("save_file", { path: path, drawingId: styleId, jsonParams: JSON.stringify(parameterObject) });
+        let jsonParams;
+        if(styleId == "custom") {
+            jsonParams = JSON.stringify({"plugin_path":parameterObject["plugin_path"], "plugin_parameters_json":JSON.stringify(parameterObject)});
+        } else {
+            jsonParams = JSON.stringify(parameterObject);
+        }
+
+        await invoke("save_file", { path: path, drawingId: styleId, jsonParams: jsonParams });
         toast.success("File saved!", { position: "bottom-center", duration: 3000 });
     }
 
@@ -110,9 +135,22 @@
         await invoke("open_file", { path: path })
             .then(async (val) => {
                 styleId = val[0];
-                parameterObject = JSON.parse(val[1]);
 
-                await props.onStateChange(styleId, parameterObject);
+                if(styleId == "custom") {
+
+                    let json = JSON.parse(val[1]);
+                    parameterObject = JSON.parse(json["plugin_parameters_json"]);
+
+                    loadCustomParameters(true);
+
+                    await props.onStateChange(styleId, parameterObject);
+
+                } else {
+                    parameterObject = JSON.parse(val[1]);
+
+                    await props.onStateChange(styleId, parameterObject);
+                }
+
             })
             .catch((err) => {
                 toast.error(`Error opening file! ${err}`, { position: "bottom-center", duration: 3000 });
@@ -145,7 +183,7 @@
 
         {#if styleId == "custom"}
 
-            <FileSelector name={"Plugin File"} id={"plugin_path"} description={"The path to the Python file"} bind:value={parameterObject["plugin_path"]} onChangeCallback={async () => { await loadCustomParameters(); await makePreview(undefined); } } />
+            <FileSelector name={"Plugin File"} id={"plugin_path"} description={"The path to the Python file"} bind:value={parameterObject["plugin_path"]} onChangeCallback={async (newFile) => { await loadCustomParameters(newFile); await makePreview(undefined); } } />
 
             {#if parameterObject.length != 2}
                 <Divider />
