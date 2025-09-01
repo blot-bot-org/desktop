@@ -8,6 +8,7 @@
     export let element;
     export let text;
 
+    // parameters for the popups
     onMount(() => {
         tippy(element, {
             content: text,

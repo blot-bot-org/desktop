@@ -13,6 +13,12 @@
 
     let labelElement;
 
+    //
+    // Usage: opens an OS file selector dialogue for file selection, updates it's internal `value` to the file path.
+    // 
+    // Parameters: none
+    // Returns: none
+    //
     async function openFile() {
         let path = await open({
             multiple: false,

@@ -21,9 +21,8 @@
     let pageHeightValue = $state("");
 
 
+    // when the elements loads we load all the old values, if they exist
     onMount(async () => {
-
-        // when the elements loads we load all the old values, if they exist
         await invoke("get_app_config")
             .then((val) => {
                 let json = JSON.parse(val);
@@ -41,6 +40,14 @@
     });
 
 
+    //
+    // Usage: called when the user closes the settings dialogue.
+    // It'll (annoyingly lol) stop the user closing the dialogue if any of the inputted data is wrong.
+    // If the data is okay, the dialogue will close and the data will be written to the disk.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function submit() {
 
         // first check that the values are valid

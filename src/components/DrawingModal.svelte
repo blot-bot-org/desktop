@@ -22,6 +22,7 @@
     let buttonShowing = $state(true);
     let text = $state("");
     
+    // state object / updater for the layout of the screen
     class ModalLayout {
         showButton: bool;
         buttonText: string;
@@ -45,11 +46,17 @@
 
     ModalLayout.applyLayout(new ModalLayout(true, "Done", "Place the pen at the top left of the page. Ensure the pen lid is on."));
 
+
+    // 
+    // Usage: called when the user progresses the menu and updates the app state accordingly.
     // 0 -> move pen to 0, 0
     // 1 -> pen moving to new position
     // 2 -> start drawing in x seconds
     // -1 -> error
-
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function buttonPressed(): void {
 
         if(progress == -1) {

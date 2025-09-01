@@ -37,7 +37,12 @@
     let bySecondUpdateInterval = undefined;
 
     
-
+    //
+    // Usage: called initially when the machine starts drawing, prepares and shows all the on-screen content.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function startDrawing() {
         while(document.getElementById("modal-preview-img") == null) { await new Promise(p => setTimeout(p, 50)); }
 
@@ -76,6 +81,12 @@
         firmware_progress(); // cancels listener
     }
 
+    //
+    // Usage: calls the pause drawing command, this will toggle the paused and unpaused state.
+    //
+    // Parameters: 
+    // Returns: 
+    //
     async function pauseDrawing() {
         if(!drawingFinished && isDrawing) {
             await invoke("pause_firmware");
@@ -84,6 +95,12 @@
         }
     }
 
+    //
+    // Usage: calls the stop drawing command.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function stopDrawing() {
         if(!drawingFinished && isDrawing) {
             await invoke("stop_drawing");
@@ -91,7 +108,13 @@
     }
 
 
-
+    //
+    // Usage: handles progress updates from the backend rust emitter.
+    // It then calls for values to be updated on-screen.
+    //
+    // Parameters: the payload from the backend emitter
+    // Returns: none
+    //
     function handleProgress(payload) {
         if(payload["event"] == "populate_network") {
             updateWindow({ _msAddress: payload["address"] });
@@ -160,6 +183,12 @@
         }
     }
 
+    //
+    // Usage: called every second during a drawing to update time based values.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     function bySecondUpdate() {
         let hours = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
         let minutes = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
@@ -178,7 +207,6 @@
     }
 
 
-
     type UpdateWindowParams = {
         _msState?: string;
         _msAddress?: string;
@@ -192,6 +220,12 @@
         _mcProtocol?: string;
     };
 
+    //
+    // Usage: will updated all non-undefined values in the given parameter object in the on-screen dialogue.
+    //
+    // Parameters: params, the set of parameters to update
+    // Returns: none
+    //
     export function updateWindow(params: UpdateWindowParams = {}) {
         const {
             _msState,

@@ -9,11 +9,22 @@
 
     let selfElement = undefined;
 
+    //
+    // Usage: makes self a wider bar.
+    // 
+    // Parameters: state, true if the bar should be wide
+    // Returns: none
+    // 
     export function setWide(state: bool): void {
         selfElement.style.width = `${(state ? activeWidth : defaultWidth)}%`;
     }
 
-    // gives a bar a colour if state true, if err false bar primary accent, if err true, bar error colour
+    //
+    // Usage: set the bar to be colour-filled or grey.
+    // 
+    // Parameters: state, true if the bar should be colour-filled, if err true colour will be red else blue.
+    // Returns: none
+    // 
     export function setColoured(state: bool, err: bool): void {
         if(state) {
             selfElement.classList.remove("bar-colour-" + (!err ? "in" : "") + "valid");

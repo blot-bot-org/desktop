@@ -11,10 +11,11 @@
     export let progress: number;
     export let isError;
 
-    let refList = [];
+    let refList = []; // reference of all bars as svelte objects
     let remainingWidth = 100 - activeWidth;
     let defaultWidth = remainingWidth / (numBars - 1); // remainingWidth / remainingBars essentially
 
+    // automatically update bars active
     $: {
         if(mounted) {
             isError; // update on error as well.
@@ -24,6 +25,12 @@
         }
     }
 
+    // 
+    // Usage: to set n, and all previous bars as active. This changes their colour.
+    //
+    // Parameters: idx of the bar to set as active
+    // Returns: none
+    //
     export function setBarActive(idx: number) {
         // set all bars up to idx to blue, set all as short
         for(let i = 0; i < numBars; i++) {

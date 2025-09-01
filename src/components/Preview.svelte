@@ -7,19 +7,27 @@
     import toast, { Toaster } from "svelte-french-toast";
 
 
+    // the real preview image height in pixels, we default to an a4 page
     let imageWidth = $state(210);
     let imageHeight = $state(297);
 
+    // estimated drawing time and instruction bytes to display in the bottom left of the preview
     let estDrawTimeSeconds = $state(-1);
     let instructionByteNumber = $state(0);
 
+    // function to resize preview when the window is resized
     (async () => {
         const unlisten = await getCurrentWindow().onResized(({ payload: size }) => {
             recomputeImageResolution(imageWidth, imageHeight);
         });
     })()
 
-    // calculates the on-screen image resolution
+    // 
+    // Usage: recomputes and adjusts the preview sized, so the real images fits within the margin ratio
+    // of the preview stage.
+    // 
+    //  Parameters: none
+    //  Returns: none
     function recomputeImageResolution() {
         // get the real image resolution - so the new url needs to be set by here
         let imageElement = document.getElementById("preview-image");
@@ -51,10 +59,16 @@
         }
     }
 
-
+    // origina image src is just a white background
     let imageSrc = $state("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANIAAAEpAQMAAADcde5vAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAAB9JREFUGBntwTEBAAAAwiD7p14IX2AAAAAAAAAAAIcAIHwAAU/BTAIAAAAASUVORK5CYII=");
     let renderLoadingOverlay = $state(true);
   
+    // 
+    // Usage: this function calls the rust backend to regenerate the preview image.
+    // 
+    // Parameters: drawing style id, drawing parameters
+    // Returns: none
+    // 
     export async function gen_preview(styleId, parameterObject) {
         if(styleId == undefined || parameterObject == undefined) {
             console.log("Could not generate preview as style or parameters were undefined.");
@@ -98,6 +112,10 @@
         }, 100); // kinda bad, but only every visually bugs when page dimensions change... how to wait for image to finish loading?
     }
   
+    // 
+    // Parameters: none
+    // Returns: returns the image URL
+    // 
     export function getImageUrl(): string {
         return imageSrc;
     }
@@ -106,6 +124,13 @@
         recomputeImageResolution(); // resize the initial blank image
     });
 
+
+    // 
+    // Usage: updates the estimated time and instruction bytes of the drawing.
+    //
+    // Parameters: none
+    // Returns: none
+    // 
     async function updateTime() {
         await invoke("get_image_stats")
             .then((out) => { // out[0] = time in seconds, out[1] = num of bytes
@@ -120,6 +145,12 @@
             });
     }
 
+    // 
+    // Usage: formats unix seconds to a visually pleasing 00h 00m 00s format.
+    //
+    // Parameters: none
+    // Returns: the formatted time as a string
+    // 
     function formatTime(timeSeconds) {
         // we'll build it backwards, adding components as needed.
 

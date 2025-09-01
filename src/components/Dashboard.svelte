@@ -30,6 +30,12 @@
 
     let customParametersFile = $state({}); // holds the same stuff as the parameters.json file
 
+    //
+    // Usage: called to regenerate the preview, usually because a parameter in the dashboard has updated.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     export async function makePreview(event: Event) {
         if(event) event.preventDefault();
 
@@ -37,7 +43,14 @@
 
     }
 
-
+    //
+    // Usage: loads custom parameters to populate the dashboard when a plugin is loaded.
+    // The function will preserve pre-existing parameter values if they exist, add new ones
+    // with their default value and remove any old parameters.
+    //
+    // Parameters: newFile, false is the plugin has been reloaded
+    // Returns: none
+    //
     async function loadCustomParameters(newFile: bool) {
 
         // this lazy loads all parameters if newFile is not new
@@ -77,6 +90,12 @@
     }
 
 
+    //
+    // Usage: used to switch the style to a new one, given a style ID. It then regenerates the preview.
+    //
+    // Parameters: the new style ID
+    // Returns: none
+    //
     async function switchStyle(newStyleId) {
         parameterObject = {};
         customParametersFile = {};
@@ -91,10 +110,22 @@
         await props.onStateChange(styleId, parameterObject);
     }
 
+    //
+    // Usage: calls the current preview to be printed
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function print() {
         props.printPressed();
     }
 
+    //
+    // Usage: opens an OS file saver dialogue, saves the current drawing parameters and style to a file, and handles plugins separately.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function saveFile() {
         let path = await save({
             filter: [
@@ -121,6 +152,12 @@
         toast.success("File saved!", { position: "bottom-center", duration: 3000 });
     }
 
+    //
+    // Usage: opens an OS file selector dialogue, attempts to load a plugin from disk, and handles plugins separately.
+    //
+    // Parameters: none
+    // Returns: none
+    //
     async function openFile() {
         let path = await open({
             multiple: false,

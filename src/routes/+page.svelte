@@ -8,16 +8,20 @@
 	import { fade } from "svelte/transition";
     import { quadInOut } from "svelte/easing";
 
-
+    // references to svelte objects
     let previewRef;
     let dashboardRef;
 
+    // couple global variables, true if the described dialogue / popup is shown
     let showingModal = false;
     let showingAppConfig = false;
 
+    // used to set the app to dark mode
+    /*
     setTimeout(() => {
-        // document.documentElement.setAttribute("data-theme", "dark");
+        document.documentElement.setAttribute("data-theme", "dark");
     }, 500);
+    */ 
 
 
 </script>
