@@ -210,6 +210,16 @@ pub struct AppConfig {
     pub phys_page_height: f64,
 }
 
+/// 
+/// A function to retrieve the app configuration file as a JSON string.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - The JSON of the app configuration as a string
+/// - An error explaining why the function failed
+///
 #[tauri::command(async)]
 pub fn get_app_config(app: tauri::AppHandle) -> Result<String, ()> {
 
@@ -236,12 +246,21 @@ pub fn get_app_config(app: tauri::AppHandle) -> Result<String, ()> {
 
 }
 
+/// 
+/// A function used to save the desired app configuration to the disk.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `stringified_config`: The JSON to save, as a string
+///
+/// # Returns:
+/// - A Result<> to determine whether the function failed or succeeded
+///
 #[tauri::command(async)]
 pub fn save_app_config(app: tauri::AppHandle, stringified_config: &str) -> Result<(), ()> {
 
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
     let app_config_path = cache_dir.join("app_config.json");
-
     
     let mut file_handle = match File::create(app_config_path) {
         Ok(handle) => handle,
@@ -260,6 +279,16 @@ pub fn save_app_config(app: tauri::AppHandle, stringified_config: &str) -> Resul
     };
 }
 
+/// 
+/// A function used to get the app config as a Rust struct.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - A new AppConfig object
+/// - An error explaning why the app config couldn't be created
+///
 pub fn get_app_config_struct(app: &tauri::AppHandle) -> Result<AppConfig, ()> {
     
     let cache_dir = tauri::Manager::path(app).app_cache_dir().expect("Should get cache dir");

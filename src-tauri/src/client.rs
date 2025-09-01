@@ -280,7 +280,19 @@ pub struct AppState {
 
 
 
-
+/// 
+/// A function used to save the machine config to the disk.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `_`: The app state
+/// - `addr`: The user-configured IP address of the machine
+/// - `port`: The user-configured port of the machine to save
+///
+/// # Returns:
+/// - Ok() if the function succeeded
+/// - A string explaning why the function failed
+///
 #[tauri::command(async)]
 pub async fn save_machine_config(app: tauri::AppHandle, _: State<'_, AppState>, addr: &str, port: usize) -> Result<(), String>  {
 
@@ -297,6 +309,17 @@ pub async fn save_machine_config(app: tauri::AppHandle, _: State<'_, AppState>, 
 }
 
 
+/// 
+/// A function used to load the machine config to the disk.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `_`: The app state
+///
+/// # Returns:
+/// - The user-configured IP and port of the machine in the format `IP:PORT`
+/// - Err() if the function failed
+///
 #[tauri::command(async)]
 pub async fn get_machine_config(app: tauri::AppHandle, _: State<'_, AppState>) -> Result<String, ()>  {
 
@@ -326,5 +349,4 @@ pub async fn get_machine_config(app: tauri::AppHandle, _: State<'_, AppState>) -
     }
     
     Ok(format!("{}:{}", parts.get(0).unwrap(), parts.get(1).unwrap()).to_owned())
-
 }
