@@ -46,23 +46,8 @@ pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>)
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
 
-    // getting machine config
-    let ins_file_path = cache_dir.join("machine_conf");
-
-    match ins_file_path.try_exists() {
-        Ok(exists) => if !exists { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
-        Err(_) => { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
-    }
-
-    let ins_file = File::open(ins_file_path).unwrap();
-    let mut contents = String::new();
-
-    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
-    if contents.is_empty() {
-        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
-    }
-
-    let parts: Vec<&str> = contents.split(":").collect();
+    let machine_conf = get_machine_config_noncmd(&app).await.expect("A machine config to exist");
+    let parts: Vec<&str> = machine_conf.split(":").collect();
 
     if parts.len() != 2 {
         return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
@@ -167,22 +152,8 @@ pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
     let start_pos: Vec<f64> = start_contents.split_whitespace().filter_map(|s| s.parse::<f64>().ok()).collect();
 
     // getting machine config
-    let ins_file_path = cache_dir.join("machine_conf");
-
-    match ins_file_path.try_exists() {
-        Ok(exists) => if !exists { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
-        Err(_) => { return Err("Couldn't load machine address. Ensure it is configured.".to_owned()); },
-    }
-
-    let ins_file = File::open(ins_file_path).unwrap();
-    let mut contents = String::new();
-
-    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
-    if contents.is_empty() {
-        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
-    }
-
-    let parts: Vec<&str> = contents.split(":").collect();
+    let machine_conf = get_machine_config_noncmd(&app).await.expect("A machine config to exist");
+    let parts: Vec<&str> = machine_conf.split(":").collect();
 
     if parts.len() != 2 {
         return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
@@ -310,7 +281,7 @@ pub async fn save_machine_config(app: tauri::AppHandle, _: State<'_, AppState>, 
 
 
 /// 
-/// A function used to load the machine config to the disk.
+/// A function used to load the machine config from the disk.
 ///
 /// # Parameters:
 /// - `app`: Injected dependency from Tauri
@@ -321,7 +292,7 @@ pub async fn save_machine_config(app: tauri::AppHandle, _: State<'_, AppState>, 
 /// - Err() if the function failed
 ///
 #[tauri::command(async)]
-pub async fn get_machine_config(app: tauri::AppHandle, _: State<'_, AppState>) -> Result<String, ()>  {
+pub async fn get_machine_config(app: tauri::AppHandle) -> Result<String, ()>  {
 
     // directory handling
     let cache_dir = tauri::Manager::path(&app).app_cache_dir().expect("Should get cache dir");
@@ -341,6 +312,56 @@ pub async fn get_machine_config(app: tauri::AppHandle, _: State<'_, AppState>) -
     if contents.is_empty() {
         return Ok("null".to_owned());
     }
+    contents = match contents.strip_suffix("\n") {
+        Some(c) => c.to_string(),
+        None => contents
+    }; // optionally strip newline if it exists
+
+    let parts: Vec<&str> = contents.split(":").collect();
+
+    if parts.len() != 2 {
+        return Ok("null".to_owned());
+    }
+    
+    Ok(format!("{}:{}", parts.get(0).unwrap(), parts.get(1).unwrap()).to_owned())
+}
+
+
+/// 
+/// A function used to load the machine config from the disk.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+/// - `_`: The app state
+///
+/// # Returns:
+/// - The user-configured IP and port of the machine in the format `IP:PORT`
+/// - Err() if the function failed
+///
+pub async fn get_machine_config_noncmd(app: &tauri::AppHandle) -> Result<String, ()>  {
+
+    // directory handling
+    let cache_dir = tauri::Manager::path(app).app_cache_dir().expect("Should get cache dir");
+    let _ = std::fs::create_dir_all(&cache_dir).map_err(|s| s.to_string());
+
+    let ins_file_path = cache_dir.join("machine_conf");
+
+    match ins_file_path.try_exists() {
+        Ok(exists) => if !exists { return Ok("null".to_owned()); },
+        Err(_) => { return Ok("null".to_owned()); },
+    }
+
+    let ins_file = File::open(ins_file_path).unwrap();
+    let mut contents = String::new();
+
+    BufReader::new(ins_file).read_to_string(&mut contents).unwrap();
+    if contents.is_empty() {
+        return Ok("null".to_owned());
+    }
+    contents = match contents.strip_suffix("\n") {
+        Some(c) => c.to_string(),
+        None => contents
+    }; // optionally strip newline if it exists
 
     let parts: Vec<&str> = contents.split(":").collect();
 
