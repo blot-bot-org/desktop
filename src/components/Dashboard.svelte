@@ -51,7 +51,7 @@
     // Parameters: newFile, false is the plugin has been reloaded
     // Returns: none
     //
-    async function loadCustomParameters(newFile: bool) {
+    async function loadCustomParameters(newFile: bool, existingParameters: any | undefined) {
 
         // this lazy loads all parameters if newFile is not new
         // it preserves any pre-existing parameter values
@@ -76,9 +76,15 @@
                     }
                 }
 
+                console.log("EXISTING PARAMS: ")
+                console.log(existingParameters)
                 for(let object of customParametersFile["parameters"]) {
                     if(!currentKeys.includes(object.id) || newFile) {
-                        parameterObject[object.id] = object.default;
+                        if(existingParameters && Object.keys(existingParameters).includes(object.id)) {
+                            parameterObject[object.id] = existingParameters[object.id];
+                        } else {
+                            parameterObject[object.id] = object.default;
+                        }
                     }
                 }
 
@@ -178,7 +184,7 @@
                     let json = JSON.parse(val[1]);
                     parameterObject = JSON.parse(json["plugin_parameters_json"]);
 
-                    loadCustomParameters(true);
+                    loadCustomParameters(true, parameterObject);
 
                     await props.onStateChange(styleId, parameterObject);
 
