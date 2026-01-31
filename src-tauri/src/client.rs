@@ -46,23 +46,21 @@ pub async fn send_to_firmware(app: tauri::AppHandle, state: State<'_, AppState>)
         Err(e) => { println!("{e}"); return Err(e.to_string()); },
     };
 
-    let machine_conf = get_machine_config_noncmd(&app).await.expect("A machine config to exist");
-    let parts: Vec<&str> = machine_conf.split(":").collect();
-
-    if parts.len() != 2 {
-        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
-    }
+    let app_config = match get_app_config_struct(&app) {
+        Ok(val) => val,
+        Err(_) => { return Err("Print settings have not been configured.".to_owned()); }
+    };
 
     let mut buf_idx_lock = state.buf_idx.lock().await;
     *buf_idx_lock = 0;
     drop(buf_idx_lock);
 
 
-    win.emit("firm-prog", format!(r#"{{"event":"populate_network", "address":"{}"}}"#, format!("{}:{}", parts.get(0).unwrap(), parts.get(1).unwrap()))).unwrap();
+    win.emit("firm-prog", format!(r#"{{"event":"populate_network", "address":"{}"}}"#, format!("{}:{}", app_config.machine_addr, app_config.machine_port))).unwrap();
     win.emit("firm-prog", format!(r#"{{"event":"populate_draw", "totalBytes":"{}"}}"#, ins_set.get_binary().len())).unwrap();
 
     // create new socket, and split it into owned directions
-    let (client, machine_config) = ClientState::new(parts.get(0).unwrap(), parts.get(1).unwrap().parse::<u16>().unwrap()).await.unwrap();
+    let (client, machine_config) = ClientState::new(&app_config.machine_addr, app_config.machine_port).await.unwrap();
     let (stream_reader, stream_writer) = client.into_split();
 
     win.emit("firm-prog", r#"{"event":"connection", "message":"Machine accepted connection"}"#).unwrap();
@@ -151,21 +149,13 @@ pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
     BufReader::new(start_file).read_to_string(&mut start_contents).unwrap();
     let start_pos: Vec<f64> = start_contents.split_whitespace().filter_map(|s| s.parse::<f64>().ok()).collect();
 
-    // getting machine config
-    let machine_conf = get_machine_config_noncmd(&app).await.expect("A machine config to exist");
-    let parts: Vec<&str> = machine_conf.split(":").collect();
-
-    if parts.len() != 2 {
-        return Err("Couldn't load machine address. Ensure it is configured.".to_owned());
-    }
-    
     let app_config = match get_app_config_struct(&app) {
         Ok(val) => val,
         Err(_) => { return Err("Print settings have not been configured.".to_owned()); }
     };
     let phys_dim = PhysicalDimensions::new(app_config.phys_motor_interspace, app_config.phys_page_left_offset, app_config.phys_page_top_offset, app_config.phys_page_width, app_config.phys_page_height);
 
-    if let Err(str) = bbcore::client::move_to_start(parts.get(0).unwrap(), parts.get(1).unwrap().parse::<u16>().unwrap(), &phys_dim, start_pos[0], start_pos[1]) {
+    if let Err(str) = bbcore::client::move_to_start(&app_config.machine_addr, app_config.machine_port, &phys_dim, start_pos[0], start_pos[1]) {
         return Err(str.to_string().to_owned());
     }
 
