@@ -188,6 +188,34 @@ pub async fn apply_manual_control(app: tauri::AppHandle, target_byte: u8, data: 
 }
 
 /// 
+/// Applies a manual goto command.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
+#[tauri::command(async)]
+pub async fn manual_goto(app: tauri::AppHandle, x: f64, y: f64) -> Result<(), String>  {
+    let start_pos: Vec<f64> = vec![x, y];
+
+    let app_config = match get_app_config_struct(&app) {
+        Ok(val) => val,
+        Err(_) => { return Err("Print settings have not been configured.".to_owned()); }
+    };
+    let phys_dim = PhysicalDimensions::new(app_config.phys_motor_interspace, app_config.phys_page_left_offset, app_config.phys_page_top_offset, app_config.phys_page_width, app_config.phys_page_height);
+
+    if let Err(str) = bbcore::client::move_to_start(&app_config.machine_addr, app_config.machine_port, &phys_dim, start_pos[0], start_pos[1]) {
+        return Err(str.to_string().to_owned());
+    }
+
+    Ok(())
+}
+
+
+/// 
 /// Sends a stop command to the firmware.
 /// It emits updates to the window through the `firm-prog` channel.
 ///

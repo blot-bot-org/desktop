@@ -10,11 +10,20 @@
 
     let penLiftValue = $state(0);
 
+    let gotoX = $state(0);
+    let gotoY = $state(0);
+
 
 
 
     async function adjustControl(targetByte, value) {
         await invoke("apply_manual_control", { targetByte: targetByte, data: value });
+    }
+
+    async function goto() {
+        gotoX = parseInt(gotoX);
+        gotoY = parseInt(gotoY);
+        await invoke("manual_goto", { x: gotoX, y: gotoY });
     }
 </script>
 
@@ -32,6 +41,13 @@
 
         <button onclick={() => adjustControl(0x03, 0x01) }>Enable Motors</button>
         <button onclick={() => adjustControl(0x03, 0x00) }>Disable Motors</button>
+
+        <br>
+        <br>
+
+        <input class="number" min="0" max="300" step="0.1" bind:value={gotoX} />
+        <input class="number" min="0" max="300" step="0.1" bind:value={gotoY} />
+        <button onclick={() => goto() }>Invoke</button>
     </div>
     <button class="button close-button" onclick={() => { props.onClose(); }}>Close</button>
 
