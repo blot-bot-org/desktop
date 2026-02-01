@@ -4,6 +4,7 @@
     import Preview from "$components/Preview.svelte";
     import ClientWindow from "$components/ClientWindow.svelte";
     import AppConfig from "$components/AppConfig.svelte";
+    import ManualControl from "$components/ManualControl.svelte";
 
 	import { fade } from "svelte/transition";
     import { quadInOut } from "svelte/easing";
@@ -15,6 +16,7 @@
     // couple global variables, true if the described dialogue / popup is shown
     let showingModal = false;
     let showingAppConfig = false;
+    let showingManualControl = true;
 
     // used to set the app to dark mode
     /*
@@ -35,7 +37,13 @@
         <Preview bind:this={previewRef} />
 
         {#if previewRef} <!-- used to defer loading until preview_ref is initialised -->
-        <Dashboard bind:this={dashboardRef} onStateChange={async (styleId, parameterObject) => { await previewRef.gen_preview(styleId, parameterObject); }} printPressed={() => { showingModal = true; }} onAppConfigOpen={() => { showingAppConfig = true; console.log("hi"); }} />
+        <Dashboard
+                bind:this={dashboardRef}
+                onStateChange={async (styleId, parameterObject) => { await previewRef.gen_preview(styleId, parameterObject); }}
+                printPressed={() => { showingModal = true; }}
+                onAppConfigOpen={() => { showingAppConfig = true; }}
+                onManualControlOpen={() => { showingManualControl = true; }}
+            />
         {/if}
         
         {#if showingModal && previewRef}
@@ -47,6 +55,12 @@
         {#if showingAppConfig}
             <div transition:fade={{ duration: 150, easing: quadInOut }}>
                 <AppConfig onClose={() => { showingAppConfig = false; dashboardRef.make_preview(); }} />
+            </div>
+        {/if}
+
+        {#if showingManualControl}
+            <div transition:fade={{ duration: 150, easing: quadInOut }}>
+                <ManualControl onClose={() => { showingManualControl = false; }} />
             </div>
         {/if}
     </div>

@@ -20,6 +20,7 @@
         pausePressed(): void;
         onStateChange(styleId: string, parameterObject: any): void;
         onAppConfigOpen(): void;
+        onManualControlOpen(): void;
     } = $props(); 
 
     const drawStyles = Object.keys(Parameters);
@@ -285,7 +286,8 @@
 
         <div class="button-container">
             <button style="margin-right: 5px !important;" id="print-button" onclick={print}>Print</button>
-            <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onAppConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
+            <button style="margin-left: 5px !important;" id="print-config-button" onclick={props.onManualControlOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:remote-gen" width="24" height="24" /></button>
+            <button style="margin-left: 0px !important;" id="print-config-button" onclick={props.onAppConfigOpen}><Icon style="transform: translateY(1px);" icon="material-symbols:settings" width="24" height="24" /></button>
         </div>
 
     </div>

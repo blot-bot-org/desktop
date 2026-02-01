@@ -149,6 +149,7 @@ pub fn run() {
             client::send_to_firmware,
             client::pause_firmware,
             client::move_pen_to_start,
+            client::apply_manual_control,
             client::stop_drawing,
             client::save_machine_config,
             client::get_machine_config,

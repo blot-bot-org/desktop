@@ -163,6 +163,31 @@ pub async fn move_pen_to_start(app: tauri::AppHandle) -> Result<(), String>  {
 }
 
 /// 
+/// Applies a manual control.
+///
+/// # Parameters:
+/// - `app`: Injected dependency from Tauri
+///
+/// # Returns:
+/// - Void if the function succeeded
+/// - An error explaining why the function could not succeed
+///
+#[tauri::command(async)]
+pub async fn apply_manual_control(app: tauri::AppHandle, target_byte: u8, data: i16) -> Result<(), String>  {
+
+    let app_config = match get_app_config_struct(&app) {
+        Ok(val) => val,
+        Err(_) => { return Err("Print settings have not been configured.".to_owned()); }
+    };
+
+    if let Err(str) = bbcore::client::apply_manual_control(&app_config.machine_addr, app_config.machine_port, target_byte, data) {
+        return Err(str.to_string().to_owned());
+    }
+
+    Ok(())
+}
+
+/// 
 /// Sends a stop command to the firmware.
 /// It emits updates to the window through the `firm-prog` channel.
 ///
